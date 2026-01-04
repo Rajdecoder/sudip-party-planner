@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Sudip Party</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { padding: 20px; background: #f4f4f4; }
+        .admin-container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; margin-bottom: 20px; color: #333; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: middle; }
+        th { background-color: #ff4757; color: white; }
+        tr:hover { background-color: #f1f1f1; }
+        
+        .thumb-img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; border: 1px solid #ccc; }
+        .btn-delete { background: #ff4757; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        .btn-delete:hover { background: #c0392b; }
+        .stars { color: #f1c40f; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-container">
+        <h1>Admin Review Manager</h1>
+        <p><a href="index.html" style="color:blue;">&larr; Back to Website</a></p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Name</th>
+                    <th>Rating</th>
+                    <th>Review</th>
+                    <th>Photo/Video</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="adminTableBody">
+                </tbody>
+        </table>
+        <p id="loadingText" style="text-align:center; margin-top:20px;">Loading data...</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // --- PASTE YOUR CONFIG HERE ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCDuau7j4CyfotHfMr0svnDY8hp10F3f3M",
+            authDomain: "sudipparty-24d31.firebaseapp.com",
+            projectId: "sudipparty-24d31",
+            storageBucket: "sudipparty-24d31.firebasestorage.app",
+            messagingSenderId: "372149822854",
+            appId: "1:372149822854:web:ca02d0536a604a31703807"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const tableBody = document.getElementById('adminTableBody');
+        const loadingText = document.getElementById('loadingText');
+
+        async function loadAllReviews() {
+            // Get ALL reviews (Ordered by newest first)
+            const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
+            const querySnapshot = await getDocs(q);
+
+            loadingText.style.display = 'none';
+            tableBody.innerHTML = "";
+
+            querySnapshot.forEach((docSnapshot) => {
+                const data = docSnapshot.data();
+                const reviewId = docSnapshot.id;
+
+                // Format Date
+                let dateStr = "N/A";
+                if(data.createdAt) {
+                    dateStr = new Date(data.createdAt.seconds * 1000).toLocaleDateString();
+                }
+
+                // Stars
+                let stars = "";
+                for(let i=1; i<=5; i++) stars += (i<=data.rating) ? '★' : '☆';
+
+                // Media
+                let mediaHTML = "No Media";
+                if(data.mediaURL) {
+                    if(data.mediaType === 'video') {
+                        mediaHTML = `<a href="${data.mediaURL}" target="_blank">View Video</a>`;
+                    } else {
+                        mediaHTML = `<a href="${data.mediaURL}" target="_blank"><img src="${data.mediaURL}" class="thumb-img"></a>`;
+                    }
+                }
+
+                const row = `
+                    <tr>
+                        <td>${dateStr}</td>
+                        <td><strong>${data.name}</strong></td>
+                        <td><span class="stars">${stars}</span></td>
+                        <td>${data.text}</td>
+                        <td>${mediaHTML}</td>
+                        <td>
+                            <button class="btn-delete" onclick="deleteReview('${reviewId}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        // Expose function to window so the HTML button works
+        window.deleteReview = async function(id) {
+            if(confirm("Are you sure you want to delete this review? It cannot be undone.")) {
+                try {
+                    await deleteDoc(doc(db, "reviews", id));
+                    alert("Deleted!");
+                    location.reload(); // Refresh table
+                } catch(e) {
+                    alert("Error deleting: " + e.message);
+                }
+            }
+        }
+
+        loadAllReviews();
+    </script>
+</body>
+</html>

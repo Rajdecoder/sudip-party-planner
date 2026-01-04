@@ -25,9 +25,8 @@ const ratingValue = document.getElementById('selectedRating');
 stars.forEach(star => {
     star.addEventListener('click', () => {
         const val = star.getAttribute('data-value');
-        ratingValue.value = val; // Set hidden input value
+        ratingValue.value = val; 
         
-        // Visual Update
         stars.forEach(s => {
             if(s.getAttribute('data-value') <= val) {
                 s.style.color = "#ffc107"; // Gold
@@ -37,9 +36,7 @@ stars.forEach(star => {
         });
     });
 });
-
-// Set default visual to 5 stars
-stars.forEach(s => s.style.color = "#ffc107");
+stars.forEach(s => s.style.color = "#ffc107"); // Default 5 stars
 
 // --- 2. Navigation Menu Logic ---
 const burger = document.querySelector('.burger');
@@ -83,7 +80,50 @@ async function compressImage(file) {
     });
 }
 
-// --- 4. Review Submission Logic ---
+// --- 4. PREVIEW LOGIC (NEW ADDITION) ---
+const fileInput = document.getElementById('reviewMedia');
+const previewContainer = document.getElementById('previewContainer');
+const fileNameDisplay = document.getElementById('fileName');
+const imagePreview = document.getElementById('imagePreview');
+const videoPreview = document.getElementById('videoPreview');
+const uploadBtnText = document.getElementById('uploadBtnText');
+
+if(fileInput) {
+    fileInput.addEventListener('change', function() {
+        const file = this.files[0];
+
+        if (file) {
+            // Show Container
+            previewContainer.style.display = 'block';
+            fileNameDisplay.textContent = "Selected: " + file.name;
+            uploadBtnText.textContent = "Change File";
+
+            // Reset Previews
+            imagePreview.style.display = 'none';
+            videoPreview.style.display = 'none';
+            videoPreview.src = "";
+            imagePreview.src = "";
+
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'inline-block';
+                }
+                reader.readAsDataURL(file);
+            } else if (file.type.startsWith('video/')) {
+                const url = URL.createObjectURL(file);
+                videoPreview.src = url;
+                videoPreview.style.display = 'block';
+            }
+        } else {
+            previewContainer.style.display = 'none';
+            uploadBtnText.textContent = "Upload Photo/Video (Max 10MB)";
+        }
+    });
+}
+
+// --- 5. Review Submission Logic ---
 const reviewForm = document.getElementById('reviewForm');
 const submitBtn = document.getElementById('submitBtn');
 const uploadStatus = document.getElementById('uploadStatus');
@@ -99,7 +139,7 @@ if(reviewForm) {
         const name = document.getElementById('reviewerName').value;
         const text = document.getElementById('reviewerText').value;
         const rating = parseInt(document.getElementById('selectedRating').value);
-        const file = document.getElementById('reviewMedia').files[0];
+        const file = fileInput.files[0];
         let downloadURL = null;
         let fileType = null;
 
@@ -153,9 +193,9 @@ if(reviewForm) {
     });
 }
 
-// --- 5. Pagination & Display Logic ---
+// --- 6. Pagination & Display Logic ---
 const reviewsContainer = document.getElementById('reviewsContainer');
-const loadMoreBtn = document.getElementById('loadMoreBtn');
+const loadMoreBtn = document.getElementById('loadMoreBtn'); // You need to add this button to HTML if not present
 let lastVisible = null;
 const BATCH_SIZE = 5; 
 
@@ -176,7 +216,8 @@ async function loadReviews() {
         
         if (querySnapshot.empty && !lastVisible) {
             reviewsContainer.innerHTML = "<p style='text-align:center;'>No reviews yet. Be the first!</p>";
-            loadMoreBtn.style.display = 'none';
+            // Create Load More button dynamically if it doesn't exist
+            if(loadMoreBtn) loadMoreBtn.style.display = 'none';
             return;
         }
 
@@ -191,17 +232,17 @@ async function loadReviews() {
         });
 
         // Hide "Load More" if fewer than 5 docs returned
-        if (querySnapshot.docs.length < BATCH_SIZE) {
-            loadMoreBtn.style.display = 'none';
-        } else {
-            loadMoreBtn.style.display = 'block';
+        if(loadMoreBtn) {
+            if (querySnapshot.docs.length < BATCH_SIZE) {
+                loadMoreBtn.style.display = 'none';
+            } else {
+                loadMoreBtn.style.display = 'block';
+            }
         }
 
     } catch (error) {
         console.error("Error loading reviews:", error);
         
-        // --- IMPORTANT: INDEX CHECK ---
-        // If you see a link in the console error, click it to create the database index!
         if(error.message.includes("index")) {
             console.warn("⚠️ ACTION REQUIRED: Open browser console and click the Firebase Index creation link.");
         }

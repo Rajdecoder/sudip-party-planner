@@ -28,9 +28,10 @@
                     <li><a href="#home">Home</a></li>
                     <li><a href="#about">About</a></li>
                     <li><a href="#games">Activities</a></li>
+                    <li><a href="#reviews">Reviews</a></li>
                     <li><a href="#contact">Contact</a></li>
-                    <li><a href="New games & activities.pdf" download class="btn-download"><i
-                                class="fas fa-file-pdf"></i> Brochure</a></li>
+                    <li><a href="New games & activities.pdf" download class="btn-download"><i class="fas fa-file-pdf"></i>
+                            Brochure</a></li>
                 </ul>
                 <div class="burger">
                     <div class="line1"></div>
@@ -145,6 +146,69 @@
                 <a href="New games & activities.pdf" download class="btn btn-primary">Download Full Activity List
                     (PDF)</a>
             </div>
+        </div>
+    </section>
+    <section id="reviews" class="section-padding bg-light">
+        <div class="container">
+            <h2 class="section-title">Customer Reviews</h2>
+            <p style="text-align: center; margin-bottom: 40px;">See what our happy clients say about their unforgettable
+                parties!</p>
+    
+            <div class="reviews-grid" id="reviewsContainer">
+    
+                <div class="review-card">
+                    <div class="review-header">
+                        <img src="images/demo/review1.jpg" onerror="this.src='https://via.placeholder.com/50'" alt="User">
+                        <div>
+                            <h4>Amit Sharma</h4>
+                            <div class="stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="review-text">"Sudip Party Planner organized my son's 5th birthday. The Bull Ride was a hit!
+                        Highly recommended."</p>
+                    <div class="review-media">
+                        <img src="images/bull-ride.jpg" alt="Party Photo">
+                    </div>
+                </div>
+    
+                <div class="review-card">
+                    <div class="review-header">
+                        <img src="images/demo/review2.jpg" onerror="this.src='https://via.placeholder.com/50'" alt="User">
+                        <div>
+                            <h4>Priya Verma</h4>
+                            <div class="stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="review-text">"Great decor and timely service. The VR games were amazing for the kids."</p>
+                </div>
+    
+            </div>
+    
+            <div class="review-form-wrapper">
+                <h3>Write a Review</h3>
+                <form id="reviewForm">
+                    <input type="text" id="reviewerName" placeholder="Your Name" required>
+                    <textarea id="reviewerText" rows="3" placeholder="Share your experience..." required></textarea>
+    
+                    <label for="reviewMedia" class="file-upload-btn">
+                        <i class="fas fa-camera"></i> Upload Photo/Video
+                    </label>
+                    <input type="file" id="reviewMedia" accept="image/*,video/*" style="display: none;">
+    
+                    <div id="previewContainer" style="margin-top: 10px; display: none;">
+                        <img id="imagePreview" src="" style="max-width: 100px; border-radius: 5px;">
+                    </div>
+    
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin: 15px 0;">Post Review</button>
+                </form>
+            </div>
+    
         </div>
     </section>
 

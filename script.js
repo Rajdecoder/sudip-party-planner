@@ -22,21 +22,24 @@ const storage = getStorage(app);
 const stars = document.querySelectorAll('#starRatingInput i');
 const ratingValue = document.getElementById('selectedRating');
 
-stars.forEach(star => {
-    star.addEventListener('click', () => {
-        const val = star.getAttribute('data-value');
-        ratingValue.value = val; 
-        
-        stars.forEach(s => {
-            if(s.getAttribute('data-value') <= val) {
-                s.style.color = "#ffc107"; // Gold
-            } else {
-                s.style.color = "#ccc"; // Gray
-            }
+if(stars.length > 0) {
+    stars.forEach(star => {
+        star.addEventListener('click', () => {
+            const val = star.getAttribute('data-value');
+            ratingValue.value = val;
+            
+            stars.forEach(s => {
+                if(s.getAttribute('data-value') <= val) {
+                    s.style.color = "#ffc107"; // Gold
+                } else {
+                    s.style.color = "#ccc"; // Gray
+                }
+            });
         });
     });
-});
-stars.forEach(s => s.style.color = "#ffc107"); // Default 5 stars
+    // Set default visual to 5 stars
+    stars.forEach(s => s.style.color = "#ffc107");
+}
 
 // --- 2. Navigation Menu Logic ---
 const burger = document.querySelector('.burger');
@@ -80,7 +83,7 @@ async function compressImage(file) {
     });
 }
 
-// --- 4. PREVIEW LOGIC (NEW ADDITION) ---
+// --- 4. PREVIEW LOGIC (Shows Filename & Image) ---
 const fileInput = document.getElementById('reviewMedia');
 const previewContainer = document.getElementById('previewContainer');
 const fileNameDisplay = document.getElementById('fileName');
@@ -91,18 +94,13 @@ const uploadBtnText = document.getElementById('uploadBtnText');
 if(fileInput) {
     fileInput.addEventListener('change', function() {
         const file = this.files[0];
-
         if (file) {
-            // Show Container
             previewContainer.style.display = 'block';
-            fileNameDisplay.textContent = "Selected: " + file.name;
-            uploadBtnText.textContent = "Change File";
-
-            // Reset Previews
+            if(fileNameDisplay) fileNameDisplay.textContent = "Selected: " + file.name;
+            if(uploadBtnText) uploadBtnText.textContent = "Change File";
+            
             imagePreview.style.display = 'none';
             videoPreview.style.display = 'none';
-            videoPreview.src = "";
-            imagePreview.src = "";
 
             if (file.type.startsWith('image/')) {
                 const reader = new FileReader();
@@ -112,13 +110,11 @@ if(fileInput) {
                 }
                 reader.readAsDataURL(file);
             } else if (file.type.startsWith('video/')) {
-                const url = URL.createObjectURL(file);
-                videoPreview.src = url;
+                videoPreview.src = URL.createObjectURL(file);
                 videoPreview.style.display = 'block';
             }
         } else {
             previewContainer.style.display = 'none';
-            uploadBtnText.textContent = "Upload Photo/Video (Max 10MB)";
         }
     });
 }
@@ -193,9 +189,9 @@ if(reviewForm) {
     });
 }
 
-// --- 6. Pagination & Display Logic ---
+// --- 6. Load Reviews (WITH MEDIA FRAME FIX) ---
 const reviewsContainer = document.getElementById('reviewsContainer');
-const loadMoreBtn = document.getElementById('loadMoreBtn'); // You need to add this button to HTML if not present
+const loadMoreBtn = document.getElementById('loadMoreBtn');
 let lastVisible = null;
 const BATCH_SIZE = 5; 
 
@@ -203,8 +199,6 @@ async function loadReviews() {
     if(!reviewsContainer) return;
 
     let q;
-    
-    // Query: Order by Rating (High to Low), then limit
     if (!lastVisible) {
         q = query(collection(db, "reviews"), orderBy("rating", "desc"), limit(BATCH_SIZE));
     } else {
@@ -216,22 +210,50 @@ async function loadReviews() {
         
         if (querySnapshot.empty && !lastVisible) {
             reviewsContainer.innerHTML = "<p style='text-align:center;'>No reviews yet. Be the first!</p>";
-            // Create Load More button dynamically if it doesn't exist
             if(loadMoreBtn) loadMoreBtn.style.display = 'none';
             return;
         }
 
-        // Update cursor
         if (!querySnapshot.empty) {
             lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
         }
 
         querySnapshot.forEach((doc) => {
-            const review = doc.data();
-            createReviewCard(review);
+            const data = doc.data();
+            
+            // Stars HTML
+            let stars = "";
+            for(let i=1; i<=5; i++) stars += (i<=data.rating) ? '<i class="fas fa-star" style="color:#f1c40f"></i>' : '<i class="fas fa-star" style="color:#ccc"></i>';
+
+            // Media HTML (WITH FRAME FIX)
+            let media = "";
+            if(data.mediaURL) {
+                const content = (data.mediaType === 'video') 
+                    ? `<video controls src="${data.mediaURL}"></video>` 
+                    : `<img src="${data.mediaURL}" alt="User Review">`;
+                
+                // This wrapper '.media-frame' makes sure it fits the box defined in CSS
+                media = `<div class="media-frame">${content}</div>`;
+            }
+
+            const div = document.createElement("div");
+            div.className = "review-card";
+            div.innerHTML = `
+                <div class="review-header">
+                    <div style="width:40px; height:40px; background:#ff4757; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; margin-right:10px;">
+                        ${data.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                        <h4 style="margin:0;">${data.name}</h4>
+                        <div class="stars">${stars}</div>
+                    </div>
+                </div>
+                <p class="review-text">"${data.text}"</p>
+                ${media}
+            `;
+            reviewsContainer.appendChild(div);
         });
 
-        // Hide "Load More" if fewer than 5 docs returned
         if(loadMoreBtn) {
             if (querySnapshot.docs.length < BATCH_SIZE) {
                 loadMoreBtn.style.display = 'none';
@@ -242,54 +264,14 @@ async function loadReviews() {
 
     } catch (error) {
         console.error("Error loading reviews:", error);
-        
         if(error.message.includes("index")) {
             console.warn("⚠️ ACTION REQUIRED: Open browser console and click the Firebase Index creation link.");
         }
     }
 }
 
-function createReviewCard(review) {
-    let mediaHTML = "";
-    if (review.mediaURL) {
-        if (review.mediaType === 'video') {
-            mediaHTML = `<video controls src="${review.mediaURL}" style="width:100%; border-radius:10px; margin-top:10px; max-height:250px;"></video>`;
-        } else {
-            mediaHTML = `<img src="${review.mediaURL}" alt="Review Image" style="width:100%; border-radius:10px; margin-top:10px; max-height:250px; object-fit:cover;">`;
-        }
-    }
-
-    // Generate Stars HTML
-    let starsHTML = '';
-    for(let i=1; i<=5; i++) {
-        if(i <= review.rating) {
-            starsHTML += '<i class="fas fa-star" style="color:#f1c40f;"></i>';
-        } else {
-            starsHTML += '<i class="fas fa-star" style="color:#ccc;"></i>';
-        }
-    }
-
-    const card = document.createElement("div");
-    card.className = "review-card";
-    card.innerHTML = `
-        <div class="review-header">
-            <div style="width:40px; height:40px; background:#ff4757; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; margin-right:10px;">
-                ${review.name.charAt(0).toUpperCase()}
-            </div>
-            <div>
-                <h4 style="margin:0;">${review.name}</h4>
-                <div class="stars">${starsHTML}</div>
-            </div>
-        </div>
-        <p class="review-text">"${review.text}"</p>
-        ${mediaHTML}
-    `;
-    reviewsContainer.appendChild(card);
-}
-
 // Initial Load
 if(loadMoreBtn) {
     loadMoreBtn.addEventListener('click', loadReviews);
 }
-// Trigger first load
 loadReviews();

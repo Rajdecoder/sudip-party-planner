@@ -86,7 +86,6 @@ async function loadUserGallery() {
             lastGalleryVisible = snapshot.docs[snapshot.docs.length - 1];
         }
 
-        // --- CRITICAL FIX: Track the index correctly ---
         let startIndex = currentGalleryItems.length;
         
         snapshot.forEach((doc) => {
@@ -96,29 +95,25 @@ async function loadUserGallery() {
             const card = document.createElement('div');
             card.className = 'gallery-card';
             
-            // FIX: Capture the current index in a local variable
-            // This prevents the loop from messing up the click event
             const indexToOpen = startIndex; 
 
             if (data.mediaType === 'video') {
                 card.innerHTML = `<video src="${data.mediaURL}#t=1.0" preload="metadata" style="width:100%; height:100%; object-fit:cover;"></video>
                                   <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:white; font-size:30px; pointer-events:none;"><i class="fas fa-play-circle"></i></div>`;
-                // Use the frozen variable indexToOpen
                 card.onclick = () => window.openLightbox(indexToOpen);
             } else {
                 card.innerHTML = `<img src="${data.mediaURL}" alt="Party Event">`;
-                // Use the frozen variable indexToOpen
                 card.onclick = () => window.openLightbox(indexToOpen);
             }
 
             galleryContainer.appendChild(card);
-            startIndex++; // Increment for the next loop iteration
+            startIndex++;
         });
 
         if (loadMoreBtn) {
             loadMoreBtn.style.display = (snapshot.docs.length < GALLERY_BATCH_SIZE) ? 'none' : 'block';
             
-            // Prevent duplicate click listeners
+            // Remove old listener to prevent duplicates
             const newBtn = loadMoreBtn.cloneNode(true);
             loadMoreBtn.parentNode.replaceChild(newBtn, loadMoreBtn);
             newBtn.addEventListener('click', loadUserGallery);
@@ -155,7 +150,6 @@ window.closeLightbox = function() {
 window.changeSlide = function(n) {
     currentSlideIndex += n;
     
-    // Circular navigation logic
     if (currentSlideIndex >= currentGalleryItems.length) {
         currentSlideIndex = 0;
     } else if (currentSlideIndex < 0) {
@@ -185,6 +179,21 @@ if(lb) {
         if(e.target.id === 'lightbox') window.closeLightbox();
     });
 }
+
+// --- NEW: KEYBOARD SUPPORT (Arrow Keys & Escape) ---
+document.addEventListener('keydown', function(event) {
+    const lightbox = document.getElementById('lightbox');
+    // Only work if lightbox is visible
+    if (lightbox && lightbox.style.display === 'flex') {
+        if (event.key === 'ArrowLeft') {
+            window.changeSlide(-1);
+        } else if (event.key === 'ArrowRight') {
+            window.changeSlide(1);
+        } else if (event.key === 'Escape') {
+            window.closeLightbox();
+        }
+    }
+});
 
 
 // --- 4. REVIEW & STAR RATING LOGIC ---

@@ -33,7 +33,6 @@ window.filterGallery = function(category) {
     // Update Active Button State
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.remove('active');
-        // Check if button text contains the category (e.g. "Birthdays" contains "Birthday")
         if(btn.innerText.includes(category) || (category === 'All' && btn.innerText === 'All')) {
             btn.classList.add('active');
         }
@@ -63,8 +62,7 @@ async function loadUserGallery() {
                 q = query(colRef, orderBy("createdAt", "desc"), startAfter(lastGalleryVisible), limit(GALLERY_BATCH_SIZE));
             }
         } else {
-            // NOTE: This filtered query REQUIRES a Composite Index in Firebase Console.
-            // If you get an error in console, CLICK THE LINK in the error message to create it.
+            // Filtered Query (Index is now Enabled!)
             if (!lastGalleryVisible) {
                 q = query(colRef, where("eventType", "==", currentCategory), orderBy("createdAt", "desc"), limit(GALLERY_BATCH_SIZE));
             } else {
@@ -74,7 +72,7 @@ async function loadUserGallery() {
 
         const snapshot = await getDocs(q);
 
-        // Clear "Loading" text on first load
+        // Clear "Loading" text
         if (!lastGalleryVisible && galleryContainer.innerHTML.includes('Loading')) {
             galleryContainer.innerHTML = "";
         }
@@ -98,7 +96,7 @@ async function loadUserGallery() {
             const card = document.createElement('div');
             card.className = 'gallery-card';
             
-            // On Click -> Open Lightbox at this index
+            // On Click -> Open Lightbox
             if (data.mediaType === 'video') {
                 card.innerHTML = `<video src="${data.mediaURL}#t=1.0" preload="metadata" style="width:100%; height:100%; object-fit:cover;"></video>
                                   <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:white; font-size:30px; pointer-events:none;"><i class="fas fa-play-circle"></i></div>`;
@@ -114,26 +112,15 @@ async function loadUserGallery() {
 
         if (loadMoreBtn) {
             loadMoreBtn.style.display = (snapshot.docs.length < GALLERY_BATCH_SIZE) ? 'none' : 'block';
-            
-            // Remove old listener to prevent duplicates, then add new one
-            loadMoreBtn.removeEventListener('click', loadUserGallery); 
-            loadMoreBtn.addEventListener('click', loadUserGallery);
+            loadMoreBtn.onclick = null; // reset listener
+            loadMoreBtn.onclick = loadUserGallery;
         }
 
     } catch (error) {
         console.error("Gallery Error:", error);
-        
-        // --- HELPFUL ERROR MESSAGE ON SCREEN ---
+        // Log to console silently if index issues persist
         if(error.message.includes("index")) {
-            galleryContainer.innerHTML = `
-                <div style="text-align:center; padding: 20px; border: 2px dashed red; background: #ffe6e6; border-radius: 10px;">
-                    <h3 style="color: red;">⚠️ Admin Action Required</h3>
-                    <p>Google Firebase requires a sorting index for this category.</p>
-                    <p><strong>1. Open Developer Console (F12)</strong></p>
-                    <p><strong>2. Click the long link in the Red Error Message.</strong></p>
-                    <p><strong>3. Click "Create Index" and wait 3 minutes.</strong></p>
-                </div>
-            `;
+            console.warn("Index check required. See Firebase Console.");
         }
     }
 }
@@ -178,7 +165,6 @@ function showLightboxContent() {
     }
 }
 
-// Ensure Lightbox exists before adding listener
 const lb = document.getElementById('lightbox');
 if(lb) {
     lb.addEventListener('click', (e) => {

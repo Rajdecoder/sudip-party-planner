@@ -275,3 +275,43 @@ if(loadMoreBtn) {
     loadMoreBtn.addEventListener('click', loadReviews);
 }
 loadReviews();
+// --- 7. LOAD DYNAMIC GALLERY (User Side) ---
+const galleryContainer = document.getElementById('dynamicGallery');
+
+async function loadUserGallery() {
+    if (!galleryContainer) return;
+
+    // Get gallery items sorted by newest
+    const q = query(collection(db, "gallery"), orderBy("createdAt", "desc"), limit(20)); // Limit to 20 photos for speed
+
+    try {
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+            galleryContainer.innerHTML = "<p style='text-align:center; width:100%;'>No photos added yet.</p>";
+            return;
+        }
+
+        galleryContainer.innerHTML = ""; // Clear loading text
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const card = document.createElement('div');
+            card.className = 'gallery-card';
+
+            if (data.mediaType === 'video') {
+                card.innerHTML = `<video src="${data.mediaURL}" controls style="width:100%; height:100%; object-fit:cover;"></video>`;
+            } else {
+                card.innerHTML = `<img src="${data.mediaURL}" alt="Party Event" onclick="window.open('${data.mediaURL}')" style="cursor:pointer;">`;
+            }
+
+            galleryContainer.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error("Gallery Error:", error);
+    }
+}
+
+// Call this function
+loadUserGallery();

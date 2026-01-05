@@ -3,91 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - Sudip Party</title>
+    <title>Admin Panel - Sudip Party</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        body { padding: 0; margin: 0; background: #f4f4f4; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        
-        /* Login Box Styles */
-        .login-container {
-            background: white; padding: 40px; border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 400px;
-        }
-        .login-container input {
-            width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px;
-        }
-        .btn-login {
-            width: 100%; padding: 12px; background: #ff4757; color: white; border: none; 
-            border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 1rem;
-        }
-        .btn-login:hover { background: #e04050; }
-
-        /* Dashboard Styles (Hidden by default) */
-        .admin-dashboard {
-            display: none; /* HIDDEN INITIALLY */
-            width: 90%; max-width: 1200px; background: white; padding: 20px; 
-            border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin: 20px auto;
-        }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: middle; }
-        th { background-color: #2f3542; color: white; }
-        tr:hover { background-color: #f1f1f1; }
-        
-        .thumb-img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; border: 1px solid #ccc; }
-        .btn-delete { background: #ff4757; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; }
-        .btn-logout { background: #2f3542; color: white; padding: 8px 15px; border-radius: 5px; float: right; cursor: pointer; text-decoration: none;}
-        .error-msg { color: red; font-size: 0.9rem; margin-bottom: 10px; display: none; }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
-    <div id="loginSection" class="login-container">
-        <h2 style="color: #ff4757;">Admin Login</h2>
-        <p style="color: #666; margin-bottom: 20px;">Please sign in to manage reviews.</p>
-        
-        <p id="loginError" class="error-msg"></p>
-        
-        <form id="loginForm">
-            <input type="email" id="adminEmail" placeholder="Admin Email" required>
-            <input type="password" id="adminPass" placeholder="Password" required>
-            <button type="submit" class="btn-login" id="loginBtn">Login</button>
+    <div id="loginSection" class="login-container" style="margin: 100px auto; max-width: 400px; display: block;">
+        <h2 style="color: #ff4757; text-align:center;">Admin Login</h2>
+        <p id="loginError" class="error-msg" style="color:red; text-align:center; display:none;"></p>
+        <form id="loginForm" style="display:flex; flex-direction:column; gap:10px; padding:20px;">
+            <input type="email" id="adminEmail" placeholder="Admin Email" style="padding:10px;" required>
+            <input type="password" id="adminPass" placeholder="Password" style="padding:10px;" required>
+            <button type="submit" class="btn-login" id="loginBtn" style="padding:10px; background:#ff4757; color:white; border:none; cursor:pointer;">Login</button>
         </form>
     </div>
 
-    <div id="dashboardSection" class="admin-dashboard">
-        <div style="overflow: hidden; margin-bottom: 20px;">
-            <h1 style="float: left; margin: 0; color: #ff4757;">Admin Dashboard</h1>
-            <button id="logoutBtn" class="btn-logout">Logout</button>
-        </div>
-        <p>Manage customer reviews and photos.</p>
+    <div id="dashboardSection" class="admin-layout" style="display: none;">
         
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Name</th>
-                        <th>Rating</th>
-                        <th>Review Text</th>
-                        <th>Media</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="adminTableBody">
-                    </tbody>
-            </table>
+        <div class="admin-sidebar">
+            <h2>Admin Panel</h2>
+            <button class="menu-btn active" onclick="showTab('reviews')"><i class="fas fa-comments"></i> Manage Reviews</button>
+            <button class="menu-btn" onclick="showTab('gallery')"><i class="fas fa-images"></i> Manage Gallery</button>
+            <button class="menu-btn logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
-        <p id="loadingText" style="text-align:center; margin-top:20px;">Loading data...</p>
+
+        <div class="admin-content">
+            
+            <div id="tab-reviews">
+                <h1>Manage Reviews</h1>
+                <div style="overflow-x: auto; background: white; padding: 20px; border-radius: 8px;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background:#ddd; text-align:left;">
+                                <th style="padding:10px;">Name</th>
+                                <th style="padding:10px;">Review</th>
+                                <th style="padding:10px;">Media</th>
+                                <th style="padding:10px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTableBody"></tbody>
+                    </table>
+                    <p id="loadingReviews" style="text-align:center; margin-top:20px;">Loading reviews...</p>
+                </div>
+            </div>
+
+            <div id="tab-gallery" style="display: none;">
+                <h1>Manage Gallery</h1>
+                
+                <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3>Add New Photo/Video</h3>
+                    <input type="file" id="galleryInput" accept="image/*,video/*">
+                    <button onclick="uploadToGallery()" style="background:#2ed573; color:white; border:none; padding:10px 20px; cursor:pointer;">Upload Now</button>
+                    <p id="galleryStatus" style="margin-top:10px; color:#555;"></p>
+                </div>
+
+                <h3>Current Gallery Items</h3>
+                <div id="adminGalleryGrid" class="admin-gallery-grid">
+                    </div>
+                <p id="loadingGallery" style="text-align:center;">Loading gallery...</p>
+            </div>
+
+        </div>
     </div>
 
     <script type="module">
-        // Import Firebase Auth & Firestore
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs, doc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, deleteDoc, query, orderBy, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-        // YOUR FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyCDuau7j4CyfotHfMr0svnDY8hp10F3f3M",
             authDomain: "sudipparty-24d31.firebaseapp.com",
@@ -100,136 +85,137 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app);
 
-        // DOM Elements
+        // --- AUTH LOGIC ---
         const loginSection = document.getElementById('loginSection');
         const dashboardSection = document.getElementById('dashboardSection');
-        const loginForm = document.getElementById('loginForm');
-        const loginError = document.getElementById('loginError');
-        const loginBtn = document.getElementById('loginBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const tableBody = document.getElementById('adminTableBody');
 
-        // --- AUTH STATE LISTENER ---
-        // This runs automatically whenever the user logs in or out
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // User is logged in
                 loginSection.style.display = 'none';
-                dashboardSection.style.display = 'block';
-                document.body.style.background = "#fff"; // Change bg for dashboard
-                document.body.style.display = "block";   // Reset flex display
-                loadAllReviews(); // Load data only now
+                dashboardSection.style.display = 'flex'; // Flex for sidebar layout
+                loadReviews();
+                loadAdminGallery();
             } else {
-                // User is logged out
                 loginSection.style.display = 'block';
                 dashboardSection.style.display = 'none';
-                document.body.style.background = "#f4f4f4";
-                document.body.style.display = "flex";    // Center the login box
             }
         });
 
-        // --- LOGIN FUNCTION ---
-        loginForm.addEventListener('submit', async (e) => {
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            loginError.style.display = 'none';
-            loginBtn.innerText = "Checking...";
-            
             const email = document.getElementById('adminEmail').value;
-            const password = document.getElementById('adminPass').value;
-
+            const pass = document.getElementById('adminPass').value;
             try {
-                await signInWithEmailAndPassword(auth, email, password);
-                // The onAuthStateChanged above will handle the UI switch
+                await signInWithEmailAndPassword(auth, email, pass);
             } catch (error) {
-                console.error(error);
-                loginError.style.display = 'block';
-                loginError.innerText = "Invalid Email or Password.";
-                loginBtn.innerText = "Login";
+                document.getElementById('loginError').style.display = 'block';
+                document.getElementById('loginError').innerText = "Login Failed: " + error.message;
             }
         });
 
-        // --- LOGOUT FUNCTION ---
-        logoutBtn.addEventListener('click', () => {
-            if(confirm("Are you sure you want to logout?")) {
-                signOut(auth);
-                location.reload();
-            }
-        });
+        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
 
-        // --- DATA LOADING FUNCTION ---
-        async function loadAllReviews() {
-            const loadingText = document.getElementById('loadingText');
-            loadingText.style.display = 'block';
+        // --- TAB SWITCHING ---
+        window.showTab = function(tabName) {
+            document.getElementById('tab-reviews').style.display = (tabName === 'reviews') ? 'block' : 'none';
+            document.getElementById('tab-gallery').style.display = (tabName === 'gallery') ? 'block' : 'none';
+            
+            // Update buttons
+            document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('button').classList.add('active');
+        };
+
+        // --- REVIEW MANAGEMENT ---
+        async function loadReviews() {
+            const tableBody = document.getElementById('adminTableBody');
+            const loadingReviews = document.getElementById('loadingReviews');
             tableBody.innerHTML = "";
+            
+            const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
+            const snapshot = await getDocs(q);
+            loadingReviews.style.display = 'none';
 
-            try {
-                const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
-                const querySnapshot = await getDocs(q);
-
-                loadingText.style.display = 'none';
-
-                if (querySnapshot.empty) {
-                    tableBody.innerHTML = "<tr><td colspan='6' style='text-align:center'>No reviews found.</td></tr>";
-                    return;
-                }
-
-                querySnapshot.forEach((docSnapshot) => {
-                    const data = docSnapshot.data();
-                    const reviewId = docSnapshot.id;
-
-                    // Format Date
-                    let dateStr = "N/A";
-                    if(data.createdAt) {
-                        dateStr = new Date(data.createdAt.seconds * 1000).toLocaleDateString();
-                    }
-
-                    // Stars
-                    let stars = "";
-                    for(let i=1; i<=5; i++) stars += (i<=data.rating) ? '★' : '☆';
-
-                    // Media
-                    let mediaHTML = "No Media";
-                    if(data.mediaURL) {
-                        if(data.mediaType === 'video') {
-                            mediaHTML = `<a href="${data.mediaURL}" target="_blank" style="color:blue">View Video</a>`;
-                        } else {
-                            mediaHTML = `<a href="${data.mediaURL}" target="_blank"><img src="${data.mediaURL}" class="thumb-img"></a>`;
-                        }
-                    }
-
-                    const row = `
-                        <tr>
-                            <td>${dateStr}</td>
-                            <td><strong>${data.name}</strong></td>
-                            <td style="color:#f1c40f">${stars}</td>
-                            <td>${data.text}</td>
-                            <td>${mediaHTML}</td>
-                            <td>
-                                <button class="btn-delete" onclick="deleteReview('${reviewId}')">Delete</button>
-                            </td>
-                        </tr>
-                    `;
-                    tableBody.innerHTML += row;
-                });
-            } catch (error) {
-                console.error("Error loading data:", error);
-                loadingText.innerText = "Error loading data. Check console.";
-            }
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const mediaHTML = data.mediaURL ? `<a href="${data.mediaURL}" target="_blank">View Media</a>` : "None";
+                const row = `
+                    <tr style="border-bottom:1px solid #eee;">
+                        <td style="padding:10px;">${data.name}</td>
+                        <td style="padding:10px;">${data.text}</td>
+                        <td style="padding:10px;">${mediaHTML}</td>
+                        <td style="padding:10px;"><button onclick="deleteItem('reviews', '${doc.id}')" style="background:red; color:white; border:none; padding:5px 10px; cursor:pointer;">Delete</button></td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
         }
 
-        // Global Delete Function
-        window.deleteReview = async function(id) {
-            if(confirm("Permanently delete this review?")) {
-                try {
-                    await deleteDoc(doc(db, "reviews", id));
-                    // Reload data without refreshing page
-                    loadAllReviews();
-                } catch(e) {
-                    alert("Error: " + e.message);
+        // --- GALLERY MANAGEMENT ---
+        window.uploadToGallery = async function() {
+            const file = document.getElementById('galleryInput').files[0];
+            const status = document.getElementById('galleryStatus');
+            
+            if (!file) { alert("Please select a file!"); return; }
+
+            status.innerText = "Uploading... please wait.";
+            const storageRef = ref(storage, 'gallery/' + Date.now() + '-' + file.name);
+            const uploadTask = uploadBytesResumable(storageRef, file);
+
+            uploadTask.on('state_changed', null, 
+                (error) => { status.innerText = "Error: " + error.message; }, 
+                async () => {
+                    const url = await getDownloadURL(uploadTask.snapshot.ref);
+                    const type = file.type.startsWith('video/') ? 'video' : 'image';
+                    
+                    await addDoc(collection(db, "gallery"), {
+                        mediaURL: url,
+                        mediaType: type,
+                        createdAt: serverTimestamp()
+                    });
+                    
+                    status.innerText = "Upload Successful!";
+                    document.getElementById('galleryInput').value = ""; // Clear input
+                    loadAdminGallery(); // Reload grid
                 }
-            }
+            );
+        };
+
+        async function loadAdminGallery() {
+            const grid = document.getElementById('adminGalleryGrid');
+            const loadingGallery = document.getElementById('loadingGallery');
+            grid.innerHTML = "";
+            
+            const q = query(collection(db, "gallery"), orderBy("createdAt", "desc"));
+            const snapshot = await getDocs(q);
+            loadingGallery.style.display = 'none';
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const mediaContent = (data.mediaType === 'video') 
+                    ? `<video src="${data.mediaURL}" muted></video>` 
+                    : `<img src="${data.mediaURL}">`;
+
+                const item = `
+                    <div class="admin-gallery-item">
+                        ${mediaContent}
+                        <div class="delete-overlay" onclick="deleteItem('gallery', '${doc.id}')">Delete</div>
+                    </div>
+                `;
+                grid.innerHTML += item;
+            });
         }
+
+        // --- SHARED DELETE FUNCTION ---
+        window.deleteItem = async function(collectionName, id) {
+            if(confirm("Are you sure you want to delete this?")) {
+                await deleteDoc(doc(db, collectionName, id));
+                if(collectionName === 'reviews') loadReviews();
+                if(collectionName === 'gallery') loadAdminGallery();
+            }
+        };
+
     </script>
 </body>
 </html>

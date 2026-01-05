@@ -553,3 +553,66 @@ footer {
     color: #999;
     font-size: 0.8rem;
 }
+
+/* --- ADMIN PANEL STYLES --- */
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.admin-sidebar {
+    width: 250px;
+    background: #2f3542;
+    color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-sidebar h2 { margin-bottom: 30px; font-size: 1.2rem; text-align: center; color: #ff4757; }
+.admin-sidebar button {
+    background: none; border: none; color: #ccc; 
+    padding: 15px; text-align: left; cursor: pointer; font-size: 1rem;
+    transition: 0.3s; border-bottom: 1px solid #444;
+}
+.admin-sidebar button:hover, .admin-sidebar button.active {
+    background: #ff4757; color: white; padding-left: 20px;
+}
+.admin-content {
+    flex: 1;
+    padding: 20px;
+    background: #f4f4f4;
+}
+.logout-btn { margin-top: auto !important; background: #c0392b !important; color: white !important; }
+
+/* Admin Gallery Grid */
+.admin-gallery-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 20px;
+}
+.admin-gallery-item {
+    position: relative; border-radius: 8px; overflow: hidden; height: 150px; border: 1px solid #ccc;
+}
+.admin-gallery-item img, .admin-gallery-item video {
+    width: 100%; height: 100%; object-fit: cover;
+}
+.delete-overlay {
+    position: absolute; bottom: 0; width: 100%; background: rgba(255, 0, 0, 0.8);
+    color: white; text-align: center; cursor: pointer; padding: 5px; opacity: 0; transition: 0.3s;
+}
+.admin-gallery-item:hover .delete-overlay { opacity: 1; }
+
+/* --- MAIN WEBSITE GALLERY STYLES --- */
+.dynamic-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+.gallery-card {
+    border-radius: 10px; overflow: hidden; height: 250px; 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1); position: relative;
+}
+.gallery-card img, .gallery-card video {
+    width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;
+}
+.gallery-card:hover img { transform: scale(1.05); }

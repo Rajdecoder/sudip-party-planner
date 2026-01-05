@@ -1,7 +1,7 @@
 // Import Firebase SDKs
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, startAfter, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+import { addDoc, collection, getDocs, getFirestore, limit, orderBy, query, serverTimestamp, startAfter, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 // --- YOUR FIREBASE CONFIGURATION ---
 const firebaseConfig = {
@@ -18,7 +18,172 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// --- 1. Star Rating Logic (UI) ---
+// --- GALLERY LOGIC VARIABLES ---
+let currentCategory = 'All';
+let lastGalleryVisible = null;
+const GALLERY_BATCH_SIZE = 10;
+let currentGalleryItems = []; // Stores loaded items for Lightbox
+
+// --- 1. FILTER FUNCTION ---
+window.filterGallery = function(category) {
+    currentCategory = category;
+    lastGalleryVisible = null; // Reset pagination
+    currentGalleryItems = []; // Clear local list
+    
+    // Update Buttons UI
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if(btn.innerText.includes(category) || (category === 'All' && btn.innerText === 'All')) {
+            btn.classList.add('active');
+        }
+    });
+
+    // Clear Grid
+    const galleryContainer = document.getElementById('dynamicGallery');
+    if(galleryContainer) galleryContainer.innerHTML = "<p style='text-align:center; width:100%;'>Loading...</p>";
+    
+    // Reload
+    loadUserGallery();
+}
+
+// --- 2. LOAD GALLERY ---
+async function loadUserGallery() {
+    const galleryContainer = document.getElementById('dynamicGallery');
+    const loadMoreBtn = document.getElementById('loadMoreGalleryBtn');
+    if (!galleryContainer) return;
+
+    try {
+        let q;
+        const colRef = collection(db, "gallery");
+
+        // Build Query based on Category
+        if (currentCategory === 'All') {
+            if (!lastGalleryVisible) {
+                q = query(colRef, orderBy("createdAt", "desc"), limit(GALLERY_BATCH_SIZE));
+            } else {
+                q = query(colRef, orderBy("createdAt", "desc"), startAfter(lastGalleryVisible), limit(GALLERY_BATCH_SIZE));
+            }
+        } else {
+            // Filtered Query (Note: Requires Index in Firestore if combining where + orderBy)
+            if (!lastGalleryVisible) {
+                q = query(colRef, where("eventType", "==", currentCategory), orderBy("createdAt", "desc"), limit(GALLERY_BATCH_SIZE));
+            } else {
+                q = query(colRef, where("eventType", "==", currentCategory), orderBy("createdAt", "desc"), startAfter(lastGalleryVisible), limit(GALLERY_BATCH_SIZE));
+            }
+        }
+
+        const snapshot = await getDocs(q);
+
+        // Clear "Loading" text on first load
+        if (!lastGalleryVisible && galleryContainer.innerHTML.includes('Loading')) {
+            galleryContainer.innerHTML = "";
+        }
+
+        if (snapshot.empty && !lastGalleryVisible) {
+            galleryContainer.innerHTML = "<p style='text-align:center; width:100%;'>No photos found for this category.</p>";
+            if(loadMoreBtn) loadMoreBtn.style.display = 'none';
+            return;
+        }
+
+        if (!snapshot.empty) {
+            lastGalleryVisible = snapshot.docs[snapshot.docs.length - 1];
+        }
+
+        // Render Items
+        let startIndex = currentGalleryItems.length; // Index offset for new items
+        
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            currentGalleryItems.push(data); // Add to global list for lightbox
+            
+            const card = document.createElement('div');
+            card.className = 'gallery-card';
+            
+            // On Click -> Open Lightbox at this index
+            const clickEvent = `openLightbox(${startIndex})`;
+
+            if (data.mediaType === 'video') {
+                card.innerHTML = `<video src="${data.mediaURL}#t=1.0" preload="metadata" style="width:100%; height:100%; object-fit:cover;"></video>
+                                  <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:white; font-size:30px; pointer-events:none;"><i class="fas fa-play-circle"></i></div>`;
+                card.onclick = () => window.openLightbox(startIndex);
+            } else {
+                card.innerHTML = `<img src="${data.mediaURL}" alt="Party Event">`;
+                card.onclick = () => window.openLightbox(startIndex);
+            }
+
+            galleryContainer.appendChild(card);
+            startIndex++;
+        });
+
+        // Toggle Load More Button
+        if (loadMoreBtn) {
+            loadMoreBtn.style.display = (snapshot.docs.length < GALLERY_BATCH_SIZE) ? 'none' : 'block';
+            // Re-attach listener to avoid duplicates
+            loadMoreBtn.onclick = null;
+            loadMoreBtn.onclick = loadUserGallery;
+        }
+
+    } catch (error) {
+        console.error("Gallery Error:", error);
+        // If index error, fallback (removes orderBy temporarily)
+        if(error.message.includes("index")) {
+            console.log("Index missing, alerting user.");
+            alert("Admin Note: Please create the Firestore Index from the link in console to enable sorting with filtering.");
+        }
+    }
+}
+
+// Initial Load
+loadUserGallery();
+
+
+// --- 3. LIGHTBOX LOGIC ---
+let currentSlideIndex = 0;
+
+window.openLightbox = function(index) {
+    currentSlideIndex = index;
+    const lightbox = document.getElementById('lightbox');
+    lightbox.style.display = 'flex';
+    showLightboxContent();
+}
+
+window.closeLightbox = function() {
+    document.getElementById('lightbox').style.display = 'none';
+    // Stop video if playing
+    const container = document.getElementById('lightbox-container');
+    container.innerHTML = "";
+}
+
+window.changeSlide = function(n) {
+    currentSlideIndex += n;
+    // Loop navigation
+    if (currentSlideIndex >= currentGalleryItems.length) currentSlideIndex = 0;
+    if (currentSlideIndex < 0) currentSlideIndex = currentGalleryItems.length - 1;
+    showLightboxContent();
+}
+
+function showLightboxContent() {
+    const container = document.getElementById('lightbox-container');
+    const item = currentGalleryItems[currentSlideIndex];
+    
+    if(!item) return;
+
+    if (item.mediaType === 'video') {
+        container.innerHTML = `<video src="${item.mediaURL}" controls autoplay class="lightbox-content"></video>`;
+    } else {
+        container.innerHTML = `<img src="${item.mediaURL}" class="lightbox-content">`;
+    }
+}
+
+// Close lightbox on outside click
+document.getElementById('lightbox').addEventListener('click', (e) => {
+    if(e.target.id === 'lightbox') window.closeLightbox();
+});
+
+
+// --- 4. REVIEW & STAR RATING LOGIC ---
+
+// Star Rating UI
 const stars = document.querySelectorAll('#starRatingInput i');
 const ratingValue = document.getElementById('selectedRating');
 
@@ -37,26 +202,11 @@ if(stars.length > 0) {
     stars.forEach(s => s.style.color = "#ffc107");
 }
 
-// --- 2. Navigation Menu Logic ---
-const burger = document.querySelector('.burger');
-const nav = document.querySelector('.nav-links');
-const navLinks = document.querySelectorAll('.nav-links li');
+// Review Submission
+const reviewForm = document.getElementById('reviewForm');
+const fileInput = document.getElementById('reviewMedia');
 
-if(burger) {
-    burger.addEventListener('click', () => {
-        nav.classList.toggle('nav-active');
-        burger.classList.toggle('toggle');
-    });
-
-    navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            nav.classList.remove('nav-active');
-            burger.classList.remove('toggle');
-        });
-    });
-}
-
-// --- 3. Image Compression Logic ---
+// Helper: Image Compression
 async function compressImage(file) {
     if (file.type.startsWith('video/')) return file;
     return new Promise((resolve) => {
@@ -79,60 +229,12 @@ async function compressImage(file) {
     });
 }
 
-// --- 4. PREVIEW LOGIC ---
-const fileInput = document.getElementById('reviewMedia');
-const previewContainer = document.getElementById('previewContainer');
-const fileNameDisplay = document.getElementById('fileName');
-const imagePreview = document.getElementById('imagePreview');
-const videoPreview = document.getElementById('videoPreview');
-const uploadBtnText = document.getElementById('uploadBtnText');
-
-if(fileInput) {
-    fileInput.addEventListener('change', function() {
-        const file = this.files[0];
-        if (file) {
-            if(previewContainer) previewContainer.style.display = 'block';
-            if(fileNameDisplay) fileNameDisplay.textContent = "Selected: " + file.name;
-            if(uploadBtnText) uploadBtnText.textContent = "Change File";
-            
-            if(imagePreview) {
-                imagePreview.style.display = 'none';
-                imagePreview.src = "";
-            }
-            if(videoPreview) {
-                videoPreview.style.display = 'none';
-                videoPreview.src = "";
-            }
-
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    if(imagePreview) {
-                        imagePreview.src = e.target.result;
-                        imagePreview.style.display = 'inline-block';
-                    }
-                }
-                reader.readAsDataURL(file);
-            } else if (file.type.startsWith('video/')) {
-                if(videoPreview) {
-                    videoPreview.src = URL.createObjectURL(file);
-                    videoPreview.style.display = 'block';
-                }
-            }
-        } else {
-            if(previewContainer) previewContainer.style.display = 'none';
-        }
-    });
-}
-
-// --- 5. Review Submission Logic ---
-const reviewForm = document.getElementById('reviewForm');
-const submitBtn = document.getElementById('submitBtn');
-const uploadStatus = document.getElementById('uploadStatus');
-const progressBar = document.getElementById('progressBar');
-const statusText = document.getElementById('statusText');
-
+// Submit Listener
 if(reviewForm) {
+    const submitBtn = document.getElementById('submitBtn');
+    const progressBar = document.getElementById('progressBar');
+    const uploadStatus = document.getElementById('uploadStatus');
+
     reviewForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         submitBtn.disabled = true;
@@ -148,7 +250,6 @@ if(reviewForm) {
         try {
             if (file) {
                 uploadStatus.style.display = 'block';
-                statusText.innerText = "Compressing & Uploading...";
                 const compressedFile = await compressImage(file);
                 fileType = file.type.startsWith('video/') ? 'video' : 'image';
                 
@@ -194,9 +295,9 @@ if(reviewForm) {
     });
 }
 
-// --- 6. Load Reviews (With Pagination) ---
+// --- 5. LOAD REVIEWS ---
 const reviewsContainer = document.getElementById('reviewsContainer');
-const loadMoreBtn = document.getElementById('loadMoreBtn');
+const loadReviewsBtn = document.getElementById('loadMoreBtn');
 let lastReviewVisible = null;
 const REVIEW_BATCH_SIZE = 5; 
 
@@ -215,7 +316,7 @@ async function loadReviews() {
         
         if (querySnapshot.empty && !lastReviewVisible) {
             reviewsContainer.innerHTML = "<p style='text-align:center;'>No reviews yet. Be the first!</p>";
-            if(loadMoreBtn) loadMoreBtn.style.display = 'none';
+            if(loadReviewsBtn) loadReviewsBtn.style.display = 'none';
             return;
         }
 
@@ -234,8 +335,8 @@ async function loadReviews() {
             let media = "";
             if(data.mediaURL) {
                 const content = (data.mediaType === 'video') 
-                    ? `<video controls src="${data.mediaURL}"></video>` 
-                    : `<img src="${data.mediaURL}" alt="User Review">`;
+                    ? `<video controls src="${data.mediaURL}" style="max-width:100%; border-radius:5px; margin-top:10px;"></video>` 
+                    : `<img src="${data.mediaURL}" alt="User Review" style="max-width:100%; border-radius:5px; margin-top:10px;">`;
                 media = `<div class="media-frame">${content}</div>`;
             }
 
@@ -257,8 +358,8 @@ async function loadReviews() {
             reviewsContainer.appendChild(div);
         });
 
-        if(loadMoreBtn) {
-            loadMoreBtn.style.display = (querySnapshot.docs.length < REVIEW_BATCH_SIZE) ? 'none' : 'block';
+        if(loadReviewsBtn) {
+            loadReviewsBtn.style.display = (querySnapshot.docs.length < REVIEW_BATCH_SIZE) ? 'none' : 'block';
         }
 
     } catch (error) {
@@ -267,100 +368,23 @@ async function loadReviews() {
 }
 
 // Initial Review Load
-if(loadMoreBtn) {
-    loadMoreBtn.addEventListener('click', loadReviews);
-}
+if(loadReviewsBtn) loadReviewsBtn.addEventListener('click', loadReviews);
 loadReviews();
 
 
-// --- 7. LOAD DYNAMIC GALLERY (UPDATED with Pagination) ---
-const galleryContainer = document.getElementById('dynamicGallery');
-const loadMoreGalleryBtn = document.getElementById('loadMoreGalleryBtn');
-let lastGalleryVisible = null;
-const GALLERY_BATCH_SIZE = 10; // Show 10 images at a time
-
-async function loadUserGallery() {
-    if (!galleryContainer) return;
-
-    let q;
-    if (!lastGalleryVisible) {
-        // First Load: Get first 10
-        q = query(collection(db, "gallery"), orderBy("createdAt", "desc"), limit(GALLERY_BATCH_SIZE));
-    } else {
-        // Next Loads: Get 10 AFTER the last one we saw
-        q = query(collection(db, "gallery"), orderBy("createdAt", "desc"), startAfter(lastGalleryVisible), limit(GALLERY_BATCH_SIZE));
-    }
-
-    try {
-        const snapshot = await getDocs(q);
-
-        // If it's the very first load and we found nothing
-        if (snapshot.empty && !lastGalleryVisible) {
-            galleryContainer.innerHTML = "<p style='text-align:center; width:100%;'>No photos added yet.</p>";
-            if(loadMoreGalleryBtn) loadMoreGalleryBtn.style.display = 'none';
-            return;
-        }
-
-        // If we found data, remove the "Loading..." text if it's there
-        if (!lastGalleryVisible && galleryContainer.querySelector('p')) {
-             galleryContainer.innerHTML = "";
-        }
-
-        // Update the cursor to the last document
-        if (!snapshot.empty) {
-            lastGalleryVisible = snapshot.docs[snapshot.docs.length - 1];
-        }
-
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            const card = document.createElement('div');
-            card.className = 'gallery-card';
-
-            if (data.mediaType === 'video') {
-                card.innerHTML = `<video src="${data.mediaURL}" controls style="width:100%; height:100%; object-fit:cover;"></video>`;
-            } else {
-                card.innerHTML = `<img src="${data.mediaURL}" alt="Party Event" onclick="window.open('${data.mediaURL}')" style="cursor:pointer;">`;
-            }
-
-            galleryContainer.appendChild(card);
-        });
-
-        // Hide "Load More" button if we got fewer than 10 results (meaning no more left)
-        if (loadMoreGalleryBtn) {
-            if (snapshot.docs.length < GALLERY_BATCH_SIZE) {
-                loadMoreGalleryBtn.style.display = 'none';
-            } else {
-                loadMoreGalleryBtn.style.display = 'block';
-            }
-        }
-
-    } catch (error) {
-        console.error("Gallery Error:", error);
-    }
-}
-
-// Initial Gallery Load
-if(loadMoreGalleryBtn) {
-    loadMoreGalleryBtn.addEventListener('click', loadUserGallery);
-}
-loadUserGallery();
-
-// --- BOOKING FORM LOGIC (WhatsApp & Email) ---
+// --- 6. BOOKING FORM LOGIC ---
 window.sendBooking = function(type) {
-    // 1. Get Values
     const name = document.getElementById('bookName').value;
     const phone = document.getElementById('bookPhone').value;
     const address = document.getElementById('bookAddress').value;
     const date = document.getElementById('bookDate').value;
     const eventType = document.getElementById('bookType').value;
 
-    // 2. Validation
     if(!name || !phone || !date) {
         alert("Please fill in Name, Phone Number, and Date.");
         return;
     }
 
-    // 3. Create Message
     const message = `*New Booking Enquiry*\n\n` +
                     `*Name:* ${name}\n` +
                     `*Phone:* ${phone}\n` +
@@ -369,15 +393,47 @@ window.sendBooking = function(type) {
                     `*Address:* ${address}\n\n` +
                     `Please confirm availability.`;
 
-    // 4. Send
     if(type === 'whatsapp') {
-        // Open WhatsApp
         const waLink = `https://wa.me/917530886327?text=${encodeURIComponent(message)}`;
         window.open(waLink, '_blank');
     } else if(type === 'email') {
-        // Open Email App
         const subject = `Booking Enquiry - ${name}`;
         const mailLink = `mailto:MagicianSudip@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
         window.location.href = mailLink;
     }
 };
+
+// --- 7. PREVIEW LOGIC (User Review Upload) ---
+const previewContainer = document.getElementById('previewContainer');
+const imagePreview = document.getElementById('imagePreview');
+const videoPreview = document.getElementById('videoPreview');
+const uploadBtnText = document.getElementById('uploadBtnText');
+
+if(fileInput) {
+    fileInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            if(previewContainer) previewContainer.style.display = 'block';
+            if(uploadBtnText) uploadBtnText.textContent = "Change File";
+            
+            if(imagePreview) { imagePreview.style.display = 'none'; imagePreview.src = ""; }
+            if(videoPreview) { videoPreview.style.display = 'none'; videoPreview.src = ""; }
+
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if(imagePreview) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'inline-block';
+                    }
+                }
+                reader.readAsDataURL(file);
+            } else if (file.type.startsWith('video/')) {
+                if(videoPreview) {
+                    videoPreview.src = URL.createObjectURL(file);
+                    videoPreview.style.display = 'block';
+                }
+            }
+        }
+    });
+}

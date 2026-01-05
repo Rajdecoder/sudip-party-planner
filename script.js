@@ -194,34 +194,33 @@ if(reviewForm) {
     });
 }
 
-// --- 6. Load Reviews (CORRECT PUBLIC CARD VERSION) ---
+// --- 6. Load Reviews (With Pagination) ---
 const reviewsContainer = document.getElementById('reviewsContainer');
 const loadMoreBtn = document.getElementById('loadMoreBtn');
-let lastVisible = null;
-const BATCH_SIZE = 5; 
+let lastReviewVisible = null;
+const REVIEW_BATCH_SIZE = 5; 
 
 async function loadReviews() {
-    // Safety check: If we are on the Admin page, this container won't exist, so stop.
     if(!reviewsContainer) return;
 
     let q;
-    if (!lastVisible) {
-        q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), limit(BATCH_SIZE));
+    if (!lastReviewVisible) {
+        q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), limit(REVIEW_BATCH_SIZE));
     } else {
-        q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), startAfter(lastVisible), limit(BATCH_SIZE));
+        q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), startAfter(lastReviewVisible), limit(REVIEW_BATCH_SIZE));
     }
 
     try {
         const querySnapshot = await getDocs(q);
         
-        if (querySnapshot.empty && !lastVisible) {
+        if (querySnapshot.empty && !lastReviewVisible) {
             reviewsContainer.innerHTML = "<p style='text-align:center;'>No reviews yet. Be the first!</p>";
             if(loadMoreBtn) loadMoreBtn.style.display = 'none';
             return;
         }
 
         if (!querySnapshot.empty) {
-            lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+            lastReviewVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
         }
 
         querySnapshot.forEach((doc) => {
@@ -231,7 +230,7 @@ async function loadReviews() {
             let stars = "";
             for(let i=1; i<=5; i++) stars += (i<=data.rating) ? '<i class="fas fa-star" style="color:#f1c40f"></i>' : '<i class="fas fa-star" style="color:#ccc"></i>';
 
-            // Generate Media HTML (Card Style)
+            // Generate Media HTML
             let media = "";
             if(data.mediaURL) {
                 const content = (data.mediaType === 'video') 
@@ -240,7 +239,6 @@ async function loadReviews() {
                 media = `<div class="media-frame">${content}</div>`;
             }
 
-            // Create the Card Element
             const div = document.createElement("div");
             div.className = "review-card";
             div.innerHTML = `
@@ -260,41 +258,58 @@ async function loadReviews() {
         });
 
         if(loadMoreBtn) {
-            loadMoreBtn.style.display = (querySnapshot.docs.length < BATCH_SIZE) ? 'none' : 'block';
+            loadMoreBtn.style.display = (querySnapshot.docs.length < REVIEW_BATCH_SIZE) ? 'none' : 'block';
         }
 
     } catch (error) {
         console.error("Error loading reviews:", error);
-        if(error.message.includes("index")) {
-            console.warn("⚠️ ACTION REQUIRED: Open browser console and click the Firebase Index creation link.");
-        }
     }
 }
 
-// Initial Load
+// Initial Review Load
 if(loadMoreBtn) {
     loadMoreBtn.addEventListener('click', loadReviews);
 }
 loadReviews();
 
 
-// --- 7. LOAD DYNAMIC GALLERY (User Side) ---
+// --- 7. LOAD DYNAMIC GALLERY (UPDATED with Pagination) ---
 const galleryContainer = document.getElementById('dynamicGallery');
+const loadMoreGalleryBtn = document.getElementById('loadMoreGalleryBtn');
+let lastGalleryVisible = null;
+const GALLERY_BATCH_SIZE = 10; // Show 10 images at a time
 
 async function loadUserGallery() {
     if (!galleryContainer) return;
 
-    const q = query(collection(db, "gallery"), orderBy("createdAt", "desc"), limit(20)); 
+    let q;
+    if (!lastGalleryVisible) {
+        // First Load: Get first 10
+        q = query(collection(db, "gallery"), orderBy("createdAt", "desc"), limit(GALLERY_BATCH_SIZE));
+    } else {
+        // Next Loads: Get 10 AFTER the last one we saw
+        q = query(collection(db, "gallery"), orderBy("createdAt", "desc"), startAfter(lastGalleryVisible), limit(GALLERY_BATCH_SIZE));
+    }
 
     try {
         const snapshot = await getDocs(q);
 
-        if (snapshot.empty) {
+        // If it's the very first load and we found nothing
+        if (snapshot.empty && !lastGalleryVisible) {
             galleryContainer.innerHTML = "<p style='text-align:center; width:100%;'>No photos added yet.</p>";
+            if(loadMoreGalleryBtn) loadMoreGalleryBtn.style.display = 'none';
             return;
         }
 
-        galleryContainer.innerHTML = ""; // Clear loading text
+        // If we found data, remove the "Loading..." text if it's there
+        if (!lastGalleryVisible && galleryContainer.querySelector('p')) {
+             galleryContainer.innerHTML = "";
+        }
+
+        // Update the cursor to the last document
+        if (!snapshot.empty) {
+            lastGalleryVisible = snapshot.docs[snapshot.docs.length - 1];
+        }
 
         snapshot.forEach(doc => {
             const data = doc.data();
@@ -310,9 +325,22 @@ async function loadUserGallery() {
             galleryContainer.appendChild(card);
         });
 
+        // Hide "Load More" button if we got fewer than 10 results (meaning no more left)
+        if (loadMoreGalleryBtn) {
+            if (snapshot.docs.length < GALLERY_BATCH_SIZE) {
+                loadMoreGalleryBtn.style.display = 'none';
+            } else {
+                loadMoreGalleryBtn.style.display = 'block';
+            }
+        }
+
     } catch (error) {
         console.error("Gallery Error:", error);
     }
 }
 
+// Initial Gallery Load
+if(loadMoreGalleryBtn) {
+    loadMoreGalleryBtn.addEventListener('click', loadUserGallery);
+}
 loadUserGallery();

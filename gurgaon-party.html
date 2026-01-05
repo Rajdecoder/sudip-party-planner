@@ -16,7 +16,22 @@
                 <div class="logo-icon">S</div>
                 <div class="logo-text">Sudip <span>Party Planner</span></div>
             </div>
-            <nav><ul class="nav-links"><li><a href="index.html">Back to Home</a></li></ul></nav>
+            <nav>
+                <div class="burger">
+                    <div class="line1"></div>
+                    <div class="line2"></div>
+                    <div class="line3"></div>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="index.html#about">About</a></li>
+                    <li><a href="index.html#games">Activities</a></li>
+                    <li><a href="index.html#gallery">Gallery</a></li>
+                    <li><a href="index.html#reviews">Reviews</a></li>
+                    <li><a href="index.html#contact">Contact</a></li>
+                    <li><a href="brochure.pdf" download class="btn-download"><i class="fas fa-file-pdf"></i> Catalog</a></li>
+                </ul>
+            </nav>
         </div>
     </header>
 
@@ -52,9 +67,35 @@
     </section>
 
     <footer class="main-footer">
-        <div class="container" style="text-align: center;">
-            <p>&copy; 2026 Sudip Party Planner. <a href="index.html" style="color:var(--primary-color);">Go to Home</a></p>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Sudip Party Planner</h3>
+                    <p><strong>Email:</strong> MagicianSudip@gmail.com</p>
+                </div>
+                <div class="footer-col">
+                    <h3>We Serve In</h3>
+                    <ul class="location-links">
+                        <li><a href="delhi-party.html">Delhi</a></li>
+                        <li><a href="noida-party.html">Noida</a></li>
+                        <li><a href="gurgaon-party.html">Gurgaon</a></li>
+                        <li><a href="rohini-party.html">Rohini</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Sudip Party Planner.</p>
+            </div>
         </div>
     </footer>
+
+    <script>
+        const burger = document.querySelector('.burger');
+        const nav = document.querySelector('.nav-links');
+        burger.addEventListener('click', () => {
+            nav.classList.toggle('nav-active');
+            burger.classList.toggle('toggle');
+        });
+    </script>
 </body>
 </html>

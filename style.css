@@ -201,3 +201,90 @@ header {
     color: white;
     border-color: var(--primary-color);
 }
+
+/* --- NEW ADDITIONS FOR BOOKING FORM & BROCHURE --- */
+
+/* Text Link Style for Brochure */
+.text-link {
+    color: var(--primary-color);
+    font-weight: 700;
+    text-decoration: underline;
+}
+.text-link:hover { color: var(--primary-dark); }
+
+/* Contact Section Layout */
+.contact-grid-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-top: 30px;
+    align-items: start;
+}
+
+/* Info Box Styling */
+.contact-info-box {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+}
+
+/* Booking Form Styling */
+.booking-form-box {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    border-top: 5px solid var(--primary-color);
+}
+.booking-form-box h3 {
+    text-align: center;
+    color: var(--dark-color);
+    margin-bottom: 20px;
+}
+.form-group { margin-bottom: 15px; }
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+}
+
+/* Booking Buttons */
+.booking-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+.btn-whatsapp-book, .btn-email-book {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    color: white;
+    font-size: 0.9rem;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: 0.3s;
+}
+.btn-whatsapp-book { background-color: #2ed573; }
+.btn-whatsapp-book:hover { background-color: #26af61; }
+
+.btn-email-book { background-color: #ff4757; }
+.btn-email-book:hover { background-color: #e84118; }
+
+/* Mobile Responsiveness for Contact Grid */
+@media (max-width: 768px) {
+    .contact-grid-layout {
+        grid-template-columns: 1fr; /* Stack on mobile */
+    }
+    .booking-actions {
+        flex-direction: column;
+    }
+}

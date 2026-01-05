@@ -344,3 +344,40 @@ if(loadMoreGalleryBtn) {
     loadMoreGalleryBtn.addEventListener('click', loadUserGallery);
 }
 loadUserGallery();
+
+// --- BOOKING FORM LOGIC (WhatsApp & Email) ---
+window.sendBooking = function(type) {
+    // 1. Get Values
+    const name = document.getElementById('bookName').value;
+    const phone = document.getElementById('bookPhone').value;
+    const address = document.getElementById('bookAddress').value;
+    const date = document.getElementById('bookDate').value;
+    const eventType = document.getElementById('bookType').value;
+
+    // 2. Validation
+    if(!name || !phone || !date) {
+        alert("Please fill in Name, Phone Number, and Date.");
+        return;
+    }
+
+    // 3. Create Message
+    const message = `*New Booking Enquiry*\n\n` +
+                    `*Name:* ${name}\n` +
+                    `*Phone:* ${phone}\n` +
+                    `*Event Type:* ${eventType}\n` +
+                    `*Date:* ${date}\n` +
+                    `*Address:* ${address}\n\n` +
+                    `Please confirm availability.`;
+
+    // 4. Send
+    if(type === 'whatsapp') {
+        // Open WhatsApp
+        const waLink = `https://wa.me/917530886327?text=${encodeURIComponent(message)}`;
+        window.open(waLink, '_blank');
+    } else if(type === 'email') {
+        // Open Email App
+        const subject = `Booking Enquiry - ${name}`;
+        const mailLink = `mailto:MagicianSudip@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
+        window.location.href = mailLink;
+    }
+};

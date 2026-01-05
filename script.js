@@ -1,7 +1,7 @@
 // Import Firebase SDKs
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { addDoc, collection, getDocs, getFirestore, limit, orderBy, query, serverTimestamp, startAfter } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, startAfter, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 // --- YOUR FIREBASE CONFIGURATION ---
 const firebaseConfig = {
@@ -29,11 +29,7 @@ if(stars.length > 0) {
             ratingValue.value = val;
             
             stars.forEach(s => {
-                if(s.getAttribute('data-value') <= val) {
-                    s.style.color = "#ffc107"; // Gold
-                } else {
-                    s.style.color = "#ccc"; // Gray
-                }
+                s.style.color = (s.getAttribute('data-value') <= val) ? "#ffc107" : "#ccc";
             });
         });
     });
@@ -83,7 +79,7 @@ async function compressImage(file) {
     });
 }
 
-// --- 4. PREVIEW LOGIC (Shows Filename & Image) ---
+// --- 4. PREVIEW LOGIC ---
 const fileInput = document.getElementById('reviewMedia');
 const previewContainer = document.getElementById('previewContainer');
 const fileNameDisplay = document.getElementById('fileName');
@@ -166,7 +162,6 @@ if(reviewForm) {
                 });
             }
 
-            // Save to Database
             await addDoc(collection(db, "reviews"), {
                 name: name,
                 text: text,
@@ -189,7 +184,7 @@ if(reviewForm) {
     });
 }
 
-// --- 6. Load Reviews (WITH MEDIA FRAME FIX) ---
+// --- 6. Load Reviews (WITH FRAME FIX) ---
 const reviewsContainer = document.getElementById('reviewsContainer');
 const loadMoreBtn = document.getElementById('loadMoreBtn');
 let lastVisible = null;
@@ -220,19 +215,14 @@ async function loadReviews() {
 
         querySnapshot.forEach((doc) => {
             const data = doc.data();
-            
-            // Stars HTML
             let stars = "";
             for(let i=1; i<=5; i++) stars += (i<=data.rating) ? '<i class="fas fa-star" style="color:#f1c40f"></i>' : '<i class="fas fa-star" style="color:#ccc"></i>';
 
-            // Media HTML (WITH FRAME FIX)
             let media = "";
             if(data.mediaURL) {
                 const content = (data.mediaType === 'video') 
                     ? `<video controls src="${data.mediaURL}"></video>` 
                     : `<img src="${data.mediaURL}" alt="User Review">`;
-                
-                // This wrapper '.media-frame' makes sure it fits the box defined in CSS
                 media = `<div class="media-frame">${content}</div>`;
             }
 
@@ -255,11 +245,7 @@ async function loadReviews() {
         });
 
         if(loadMoreBtn) {
-            if (querySnapshot.docs.length < BATCH_SIZE) {
-                loadMoreBtn.style.display = 'none';
-            } else {
-                loadMoreBtn.style.display = 'block';
-            }
+            loadMoreBtn.style.display = (querySnapshot.docs.length < BATCH_SIZE) ? 'none' : 'block';
         }
 
     } catch (error) {
@@ -275,6 +261,8 @@ if(loadMoreBtn) {
     loadMoreBtn.addEventListener('click', loadReviews);
 }
 loadReviews();
+
+
 // --- 7. LOAD DYNAMIC GALLERY (User Side) ---
 const galleryContainer = document.getElementById('dynamicGallery');
 
@@ -282,7 +270,7 @@ async function loadUserGallery() {
     if (!galleryContainer) return;
 
     // Get gallery items sorted by newest
-    const q = query(collection(db, "gallery"), orderBy("createdAt", "desc"), limit(20)); // Limit to 20 photos for speed
+    const q = query(collection(db, "gallery"), orderBy("createdAt", "desc"), limit(20)); 
 
     try {
         const snapshot = await getDocs(q);

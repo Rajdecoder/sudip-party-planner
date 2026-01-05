@@ -127,30 +127,55 @@
             event.target.closest('button').classList.add('active');
         };
 
-        // --- REVIEW MANAGEMENT ---
-        async function loadReviews() {
-            const tableBody = document.getElementById('adminTableBody');
-            const loadingReviews = document.getElementById('loadingReviews');
-            tableBody.innerHTML = "";
-            
-            const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
-            const snapshot = await getDocs(q);
-            loadingReviews.style.display = 'none';
+        // --- REVIEW MANAGEMENT (With Photo/Video Thumbnails) ---
+async function loadReviews() {
+    const tableBody = document.getElementById('adminTableBody');
+    const loadingReviews = document.getElementById('loadingReviews');
+    tableBody.innerHTML = "";
+    
+    const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
+    const snapshot = await getDocs(q);
+    loadingReviews.style.display = 'none';
 
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const mediaHTML = data.mediaURL ? `<a href="${data.mediaURL}" target="_blank">View Media</a>` : "None";
-                const row = `
-                    <tr style="border-bottom:1px solid #eee;">
-                        <td style="padding:10px;">${data.name}</td>
-                        <td style="padding:10px;">${data.text}</td>
-                        <td style="padding:10px;">${mediaHTML}</td>
-                        <td style="padding:10px;"><button onclick="deleteItem('reviews', '${doc.id}')" style="background:red; color:white; border:none; padding:5px 10px; cursor:pointer;">Delete</button></td>
-                    </tr>
-                `;
-                tableBody.innerHTML += row;
-            });
+    if (snapshot.empty) {
+        tableBody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>No reviews found.</td></tr>";
+        return;
+    }
+
+    snapshot.forEach(doc => {
+        const data = doc.data();
+        
+        // Thumbnail Logic
+        let mediaDisplay = "No Media";
+        if (data.mediaURL) {
+            if (data.mediaType === 'video') {
+                mediaDisplay = `
+                    <div style="width: 80px; height: 80px; overflow: hidden; border-radius: 5px; cursor: pointer; border: 1px solid #ccc;">
+                        <video src="${data.mediaURL}" style="width: 100%; height: 100%; object-fit: cover;" onclick="window.open('${data.mediaURL}')"></video>
+                    </div>`;
+            } else {
+                mediaDisplay = `
+                    <div style="width: 80px; height: 80px; overflow: hidden; border-radius: 5px; cursor: pointer; border: 1px solid #ccc;">
+                        <img src="${data.mediaURL}" style="width: 100%; height: 100%; object-fit: cover;" onclick="window.open('${data.mediaURL}')" alt="Review Image">
+                    </div>`;
+            }
         }
+
+        const row = `
+            <tr style="border-bottom:1px solid #eee;">
+                <td style="padding:10px; font-weight:bold;">${data.name}</td>
+                <td style="padding:10px; max-width: 300px;">${data.text}</td>
+                <td style="padding:10px;">${mediaDisplay}</td>
+                <td style="padding:10px;">
+                    <button onclick="deleteItem('reviews', '${doc.id}')" style="background: #ff4757; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </td>
+            </tr>
+        `;
+        tableBody.innerHTML += row;
+    });
+}
 
         // --- GALLERY MANAGEMENT ---
         window.uploadToGallery = async function() {

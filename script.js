@@ -190,57 +190,80 @@ const loadMoreBtn = document.getElementById('loadMoreBtn');
 let lastVisible = null;
 const BATCH_SIZE = 5; 
 
-// --- UPDATED REVIEW MANAGEMENT (Shows Photos/Videos in Table) ---
+// --- 6. Load Reviews (CORRECT PUBLIC VERSION) ---
 async function loadReviews() {
-    const tableBody = document.getElementById('adminTableBody');
-    const loadingReviews = document.getElementById('loadingReviews');
-    tableBody.innerHTML = "";
+    const reviewsContainer = document.getElementById('reviewsContainer');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
     
-    // Get reviews sorted by newest
-    const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
-    const snapshot = await getDocs(q);
-    loadingReviews.style.display = 'none';
+    if(!reviewsContainer) return;
 
-    if (snapshot.empty) {
-        tableBody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>No reviews found.</td></tr>";
-        return;
+    // Reset container if it's the first load
+    if (!lastVisible) {
+        reviewsContainer.innerHTML = "";
     }
 
-    snapshot.forEach(doc => {
-        const data = doc.data();
+    let q;
+    if (!lastVisible) {
+        q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), limit(BATCH_SIZE));
+    } else {
+        q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), startAfter(lastVisible), limit(BATCH_SIZE));
+    }
+
+    try {
+        const querySnapshot = await getDocs(q);
         
-        // Logic to show Image or Video Thumbnail
-        let mediaDisplay = "No Media";
-        if (data.mediaURL) {
-            if (data.mediaType === 'video') {
-                // Video Thumbnail (Click to play in new tab)
-                mediaDisplay = `
-                    <div style="width: 80px; height: 80px; overflow: hidden; border-radius: 5px; cursor: pointer; border: 1px solid #ccc;">
-                        <video src="${data.mediaURL}" style="width: 100%; height: 100%; object-fit: cover;" onclick="window.open('${data.mediaURL}')"></video>
-                    </div>`;
-            } else {
-                // Image Thumbnail (Click to view full)
-                mediaDisplay = `
-                    <div style="width: 80px; height: 80px; overflow: hidden; border-radius: 5px; cursor: pointer; border: 1px solid #ccc;">
-                        <img src="${data.mediaURL}" style="width: 100%; height: 100%; object-fit: cover;" onclick="window.open('${data.mediaURL}')" alt="Review Image">
-                    </div>`;
-            }
+        if (querySnapshot.empty && !lastVisible) {
+            reviewsContainer.innerHTML = "<p style='text-align:center;'>No reviews yet. Be the first!</p>";
+            if(loadMoreBtn) loadMoreBtn.style.display = 'none';
+            return;
         }
 
-        const row = `
-            <tr style="border-bottom:1px solid #eee;">
-                <td style="padding:10px; font-weight:bold;">${data.name}</td>
-                <td style="padding:10px; max-width: 300px;">${data.text}</td>
-                <td style="padding:10px;">${mediaDisplay}</td>
-                <td style="padding:10px;">
-                    <button onclick="deleteItem('reviews', '${doc.id}')" style="background: #ff4757; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 0.9rem;">
-                        <i class="fas fa-trash"></i> Delete
-                    </button>
-                </td>
-            </tr>
-        `;
-        tableBody.innerHTML += row;
-    });
+        if (!querySnapshot.empty) {
+            lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+        }
+
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            
+            // Stars Logic
+            let stars = "";
+            for(let i=1; i<=5; i++) stars += (i<=data.rating) ? '<i class="fas fa-star" style="color:#f1c40f"></i>' : '<i class="fas fa-star" style="color:#ccc"></i>';
+
+            // Media Logic (Public Card Style)
+            let media = "";
+            if(data.mediaURL) {
+                const content = (data.mediaType === 'video') 
+                    ? `<video controls src="${data.mediaURL}"></video>` 
+                    : `<img src="${data.mediaURL}" alt="User Review">`;
+                media = `<div class="media-frame">${content}</div>`;
+            }
+
+            // Create the Card (Not a Table Row!)
+            const div = document.createElement("div");
+            div.className = "review-card";
+            div.innerHTML = `
+                <div class="review-header">
+                    <div style="width:40px; height:40px; background:#ff4757; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; margin-right:10px;">
+                        ${data.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                        <h4 style="margin:0;">${data.name}</h4>
+                        <div class="stars">${stars}</div>
+                    </div>
+                </div>
+                <p class="review-text">"${data.text}"</p>
+                ${media}
+            `;
+            reviewsContainer.appendChild(div);
+        });
+
+        if(loadMoreBtn) {
+            loadMoreBtn.style.display = (querySnapshot.docs.length < BATCH_SIZE) ? 'none' : 'block';
+        }
+
+    } catch (error) {
+        console.error("Error loading reviews:", error);
+    }
 }
 
 

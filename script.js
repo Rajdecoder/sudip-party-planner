@@ -30,15 +30,17 @@ window.filterGallery = function(category) {
     lastGalleryVisible = null; 
     currentGalleryItems = []; 
     
+    // Update Active Button State
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.remove('active');
+        // Check if button text contains the category (e.g. "Birthdays" contains "Birthday")
         if(btn.innerText.includes(category) || (category === 'All' && btn.innerText === 'All')) {
             btn.classList.add('active');
         }
     });
 
     const galleryContainer = document.getElementById('dynamicGallery');
-    if(galleryContainer) galleryContainer.innerHTML = "<p style='text-align:center; width:100%;'>Loading...</p>";
+    if(galleryContainer) galleryContainer.innerHTML = "<p style='text-align:center; width:100%; color:#666;'>Loading...</p>";
     
     loadUserGallery();
 }
@@ -72,12 +74,13 @@ async function loadUserGallery() {
 
         const snapshot = await getDocs(q);
 
+        // Clear "Loading" text on first load
         if (!lastGalleryVisible && galleryContainer.innerHTML.includes('Loading')) {
             galleryContainer.innerHTML = "";
         }
 
         if (snapshot.empty && !lastGalleryVisible) {
-            galleryContainer.innerHTML = "<p style='text-align:center; width:100%;'>No photos found for this category.</p>";
+            galleryContainer.innerHTML = "<p style='text-align:center; width:100%; color:#666;'>No photos found for this category yet.</p>";
             if(loadMoreBtn) loadMoreBtn.style.display = 'none';
             return;
         }
@@ -111,18 +114,26 @@ async function loadUserGallery() {
 
         if (loadMoreBtn) {
             loadMoreBtn.style.display = (snapshot.docs.length < GALLERY_BATCH_SIZE) ? 'none' : 'block';
-            loadMoreBtn.onclick = null;
-            loadMoreBtn.onclick = loadUserGallery;
+            
+            // Remove old listener to prevent duplicates, then add new one
+            loadMoreBtn.removeEventListener('click', loadUserGallery); 
+            loadMoreBtn.addEventListener('click', loadUserGallery);
         }
 
     } catch (error) {
         console.error("Gallery Error:", error);
         
-        // --- FIXED: Log the link to console instead of alerting the user ---
+        // --- HELPFUL ERROR MESSAGE ON SCREEN ---
         if(error.message.includes("index")) {
-            console.log("%c ADMIN ACTION REQUIRED: Click the link below to create the index:", "color: red; font-size: 14px; font-weight: bold;");
-            // The link is actually inside the 'error' object logged above.
-            // Check the console to find the blue link starting with https://console.firebase.google.com...
+            galleryContainer.innerHTML = `
+                <div style="text-align:center; padding: 20px; border: 2px dashed red; background: #ffe6e6; border-radius: 10px;">
+                    <h3 style="color: red;">⚠️ Admin Action Required</h3>
+                    <p>Google Firebase requires a sorting index for this category.</p>
+                    <p><strong>1. Open Developer Console (F12)</strong></p>
+                    <p><strong>2. Click the long link in the Red Error Message.</strong></p>
+                    <p><strong>3. Click "Create Index" and wait 3 minutes.</strong></p>
+                </div>
+            `;
         }
     }
 }
@@ -167,9 +178,13 @@ function showLightboxContent() {
     }
 }
 
-document.getElementById('lightbox').addEventListener('click', (e) => {
-    if(e.target.id === 'lightbox') window.closeLightbox();
-});
+// Ensure Lightbox exists before adding listener
+const lb = document.getElementById('lightbox');
+if(lb) {
+    lb.addEventListener('click', (e) => {
+        if(e.target.id === 'lightbox') window.closeLightbox();
+    });
+}
 
 
 // --- 4. REVIEW & STAR RATING LOGIC ---

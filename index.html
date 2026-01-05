@@ -74,7 +74,7 @@
             <h1>India's Most Trusted <br> <span class="highlight">Event Organizers</span></h1>
             <p>From Magical Birthday Parties to Corporate Carnivals in Delhi NCR.</p>
             <div class="hero-btns">
-                <a href="#contact" class="btn-main"><i class="fas fa-phone-alt"></i> Book Now</a>
+                <a href="#contact" class="btn-main"><i class="fas fa-calendar-check"></i> Book Now</a>
                 <a href="#games" class="btn-secondary">View Activities</a>
             </div>
         </div>
@@ -113,7 +113,11 @@
     <section class="section-padding">
         <div class="container">
             <h3 style="text-align: center; margin-bottom: 20px;">We Offer 50+ Unique Activities</h3>
-            <p style="text-align: center; margin-bottom: 30px; color: #666;">Browse our full catalog in the brochure, featuring:</p>
+            
+            <p style="text-align: center; margin-bottom: 30px; color: #666; font-size: 1.1rem;">
+                Browse our full catalog in the 
+                <a href="brochure.pdf" download class="text-link"><i class="fas fa-download"></i> Brochure PDF</a>, featuring:
+            </p>
             
             <div class="seo-game-list" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
                 <span class="tag">Hammer Machine</span> <span class="tag">Punching Machine</span>
@@ -135,7 +139,7 @@
         </div>
     </section>
 
-    <section id="gallery" class="section-padding">
+    <section id="gallery" class="section-padding bg-light">
         <div class="container">
             <h2 class="section-title">Event Gallery</h2>
             <p style="text-align: center; margin-bottom: 30px; color: #666;">Highlights from our recent parties and events.</p>
@@ -146,7 +150,7 @@
         </div>
     </section>
 
-    <section id="reviews" class="section-padding bg-light">
+    <section id="reviews" class="section-padding">
         <div class="container">
             <h2 class="section-title">Happy Clients</h2>
             <div id="reviewsContainer" class="reviews-grid"></div>
@@ -192,11 +196,13 @@
         </div>
     </section>
 
-    <section id="contact" class="section-padding">
+    <section id="contact" class="section-padding bg-light">
         <div class="container">
             <h2 class="section-title">Book Your Party</h2>
-            <div class="contact-wrapper">
-                <div class="contact-info">
+            <p class="section-subtitle">Fill the form below or call us directly!</p>
+
+            <div class="contact-grid-layout">
+                <div class="contact-info-box">
                     <div class="info-item">
                         <i class="fas fa-phone-alt"></i>
                         <div>
@@ -211,13 +217,53 @@
                             <p>MagicianSudip@gmail.com</p>
                         </div>
                     </div>
+                    <div class="info-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <h4>Location</h4>
+                            <p>Sector 7, Rohini, Delhi</p>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="action-buttons">
-                    <a href="tel:+917530886327" class="btn-call"><i class="fas fa-phone-alt"></i> Call Now</a>
-                    <a href="https://wa.me/917530886327?text=Hi,%20I%20want%20to%20plan%20a%20party!" class="btn-whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                <div class="booking-form-box">
+                    <h3><i class="fas fa-calendar-alt"></i> Enquiry Form</h3>
+                    <form id="bookingForm">
+                        <div class="form-group">
+                            <input type="text" id="bookName" placeholder="Your Name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" id="bookPhone" placeholder="Mobile Number" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="bookAddress" placeholder="Party Location / Address" required>
+                        </div>
+                        <div class="form-group">
+                            <label style="font-size:0.9rem; color:#666;">Event Date:</label>
+                            <input type="date" id="bookDate" required>
+                        </div>
+                        <div class="form-group">
+                            <select id="bookType">
+                                <option value="Birthday Party">Birthday Party</option>
+                                <option value="Magic Show">Magic Show</option>
+                                <option value="Game Stall">Game Stall</option>
+                                <option value="Decoration">Decoration</option>
+                                <option value="Other">Other Event</option>
+                            </select>
+                        </div>
+
+                        <div class="booking-actions">
+                            <button type="button" class="btn-whatsapp-book" onclick="sendBooking('whatsapp')">
+                                <i class="fab fa-whatsapp"></i> Send on WhatsApp
+                            </button>
+                            <button type="button" class="btn-email-book" onclick="sendBooking('email')">
+                                <i class="fas fa-envelope"></i> Send via Email
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
+
         </div>
     </section>
 

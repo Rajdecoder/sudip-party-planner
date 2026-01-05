@@ -62,7 +62,6 @@ async function loadUserGallery() {
                 q = query(colRef, orderBy("createdAt", "desc"), startAfter(lastGalleryVisible), limit(GALLERY_BATCH_SIZE));
             }
         } else {
-            // Filtered Query (Index is now Enabled!)
             if (!lastGalleryVisible) {
                 q = query(colRef, where("eventType", "==", currentCategory), orderBy("createdAt", "desc"), limit(GALLERY_BATCH_SIZE));
             } else {
@@ -87,6 +86,7 @@ async function loadUserGallery() {
             lastGalleryVisible = snapshot.docs[snapshot.docs.length - 1];
         }
 
+        // --- CRITICAL FIX: Track the index correctly ---
         let startIndex = currentGalleryItems.length;
         
         snapshot.forEach((doc) => {
@@ -96,31 +96,38 @@ async function loadUserGallery() {
             const card = document.createElement('div');
             card.className = 'gallery-card';
             
-            // On Click -> Open Lightbox
+            // FIX: Capture the current index in a local variable
+            // This prevents the loop from messing up the click event
+            const indexToOpen = startIndex; 
+
             if (data.mediaType === 'video') {
                 card.innerHTML = `<video src="${data.mediaURL}#t=1.0" preload="metadata" style="width:100%; height:100%; object-fit:cover;"></video>
                                   <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:white; font-size:30px; pointer-events:none;"><i class="fas fa-play-circle"></i></div>`;
-                card.onclick = () => window.openLightbox(startIndex);
+                // Use the frozen variable indexToOpen
+                card.onclick = () => window.openLightbox(indexToOpen);
             } else {
                 card.innerHTML = `<img src="${data.mediaURL}" alt="Party Event">`;
-                card.onclick = () => window.openLightbox(startIndex);
+                // Use the frozen variable indexToOpen
+                card.onclick = () => window.openLightbox(indexToOpen);
             }
 
             galleryContainer.appendChild(card);
-            startIndex++;
+            startIndex++; // Increment for the next loop iteration
         });
 
         if (loadMoreBtn) {
             loadMoreBtn.style.display = (snapshot.docs.length < GALLERY_BATCH_SIZE) ? 'none' : 'block';
-            loadMoreBtn.onclick = null; // reset listener
-            loadMoreBtn.onclick = loadUserGallery;
+            
+            // Prevent duplicate click listeners
+            const newBtn = loadMoreBtn.cloneNode(true);
+            loadMoreBtn.parentNode.replaceChild(newBtn, loadMoreBtn);
+            newBtn.addEventListener('click', loadUserGallery);
         }
 
     } catch (error) {
         console.error("Gallery Error:", error);
-        // Log to console silently if index issues persist
         if(error.message.includes("index")) {
-            console.warn("Index check required. See Firebase Console.");
+            console.warn("Index missing. Check Firebase Console.");
         }
     }
 }
@@ -147,8 +154,14 @@ window.closeLightbox = function() {
 
 window.changeSlide = function(n) {
     currentSlideIndex += n;
-    if (currentSlideIndex >= currentGalleryItems.length) currentSlideIndex = 0;
-    if (currentSlideIndex < 0) currentSlideIndex = currentGalleryItems.length - 1;
+    
+    // Circular navigation logic
+    if (currentSlideIndex >= currentGalleryItems.length) {
+        currentSlideIndex = 0;
+    } else if (currentSlideIndex < 0) {
+        currentSlideIndex = currentGalleryItems.length - 1;
+    }
+    
     showLightboxContent();
 }
 
@@ -165,6 +178,7 @@ function showLightboxContent() {
     }
 }
 
+// Close on background click
 const lb = document.getElementById('lightbox');
 if(lb) {
     lb.addEventListener('click', (e) => {

@@ -7,11 +7,12 @@
     
     <title>Sudip Party Planner | Best Birthday & Event Organiser in Delhi NCR</title>
     <meta name="description" content="Looking for the best party planner in Delhi NCR? We organize Birthday Parties, Magic Shows, Game Stalls & Decor in Rohini, Pitampura, Noida & Gurgaon. Call 7530886327.">
-    <meta name="keywords" content="Birthday Party Planner Delhi, Magic Show Rohini, Event Organiser Pitampura, Kids Party Games, Party Decorator NCR">
+    <meta name="keywords" content="Birthday Party Planner Delhi, Magic Show, Bull Ride, Bumper Cars, Water Pool, Carnival Games, Hammer Machine, Kids Party Delhi">
     
     <meta property="og:title" content="Sudip Party Planner - Delhi's #1 Event Team">
     <meta property="og:description" content="Book the best magic shows, games, and decoration for your next event.">
-    <meta property="og:image" content="https://sudippartyplanner.in/your-logo.jpg"> <meta property="og:url" content="https://sudippartyplanner.in">
+    <meta property="og:image" content="https://sudippartyplanner.in/your-logo.jpg"> 
+    <meta property="og:url" content="https://sudippartyplanner.in">
 
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -21,7 +22,7 @@
       "@context": "https://schema.org",
       "@type": "EventPlanner",
       "name": "Sudip Party Planner",
-      "image": "https://sudippartyplanner.in/logo.png",
+      "email": "MagicianSudip@gmail.com",
       "telephone": "+91-7530886327",
       "address": {
         "@type": "PostalAddress",
@@ -31,15 +32,7 @@
         "postalCode": "110085",
         "addressCountry": "IN"
       },
-      "priceRange": "₹₹",
-      "openingHoursSpecification": {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": [
-          "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
-        ],
-        "opens": "09:00",
-        "closes": "22:00"
-      }
+      "priceRange": "₹₹"
     }
     </script>
 </head>
@@ -66,7 +59,8 @@
                     <li><a href="#home">Home</a></li>
                     <li><a href="#about">About</a></li>
                     <li><a href="#games">Activities</a></li>
-                    <li><a href="#gallery">Gallery</a></li> <li><a href="#reviews">Reviews</a></li>
+                    <li><a href="#gallery">Gallery</a></li>
+                    <li><a href="#reviews">Reviews</a></li>
                     <li><a href="#contact">Contact</a></li>
                     <li><a href="brochure.pdf" download class="btn-download"><i class="fas fa-file-pdf"></i> Catalog</a></li>
                 </ul>
@@ -116,15 +110,38 @@
         </div>
     </section>
 
+    <section class="section-padding">
+        <div class="container">
+            <h3 style="text-align: center; margin-bottom: 20px;">We Offer 50+ Unique Activities</h3>
+            <p style="text-align: center; margin-bottom: 30px; color: #666;">Browse our full catalog in the brochure, featuring:</p>
+            
+            <div class="seo-game-list" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+                <span class="tag">Hammer Machine</span> <span class="tag">Punching Machine</span>
+                <span class="tag">Electronic Basketball</span> <span class="tag">Bowling Machine</span>
+                <span class="tag">Buzz Wire</span> <span class="tag">Snatch It Game</span>
+                <span class="tag">Street Fighter</span> <span class="tag">Giant Piano</span>
+                <span class="tag">Lazer Gun</span> <span class="tag">Kids Boat</span>
+                <span class="tag">Water Pool</span> <span class="tag">Octopus Water Bouncy</span>
+                <span class="tag">Dolphin Bouncy</span> <span class="tag">Big Bowler</span>
+                <span class="tag">Dunk Game</span> <span class="tag">Hook the Duck</span>
+                <span class="tag">Splat Art</span> <span class="tag">Sand Pit</span>
+                <span class="tag">Beer Puppet</span> <span class="tag">Painting Competition</span>
+                <span class="tag">Spray Tattoo</span> <span class="tag">Candy Floss & Popcorn</span>
+                <span class="tag">Dancing Pad</span> <span class="tag">Karaoke System</span>
+                <span class="tag">Casino Tables</span> <span class="tag">Bumper Cars</span>
+                <span class="tag">Columbus Ride</span> <span class="tag">Giant Wheel</span>
+                <span class="tag">Bull Ride</span> <span class="tag">Trampoline</span>
+            </div>
+        </div>
+    </section>
+
     <section id="gallery" class="section-padding">
         <div class="container">
             <h2 class="section-title">Event Gallery</h2>
             <p style="text-align: center; margin-bottom: 30px; color: #666;">Highlights from our recent parties and events.</p>
-            
             <div id="dynamicGallery" class="dynamic-gallery-grid">
                 <p style="text-align:center; width:100%;">Loading Photos...</p>
             </div>
-
             <button id="loadMoreGalleryBtn" class="load-more-btn" style="display: none; margin: 30px auto;">Load More Photos</button>
         </div>
     </section>
@@ -132,13 +149,9 @@
     <section id="reviews" class="section-padding bg-light">
         <div class="container">
             <h2 class="section-title">Happy Clients</h2>
-            <p class="section-subtitle">Rated 4.9/5 by 500+ Families in Delhi NCR</p>
-
-            <div id="reviewsContainer" class="reviews-grid">
-                </div>
-
+            <div id="reviewsContainer" class="reviews-grid"></div>
             <button id="loadMoreBtn" class="load-more-btn">Read More Reviews</button>
-
+            
             <div class="add-review-box">
                 <h3><i class="fas fa-pen"></i> Write a Review</h3>
                 <form id="reviewForm">
@@ -163,20 +176,16 @@
                         </label>
                         <input type="file" id="reviewMedia" accept="image/*,video/*" style="display:none;">
                     </div>
-
                     <div id="previewContainer" style="display:none; margin-top:10px;">
                         <img id="imagePreview" style="max-width: 100px; display:none; border-radius:5px;">
                         <video id="videoPreview" style="max-width: 100px; display:none; border-radius:5px;" controls></video>
-                        <p id="fileName" style="font-size:0.8rem; color:#555;"></p>
                     </div>
-
                     <div id="uploadStatus" style="display:none; margin-top:10px;">
                         <div style="width:100%; background:#eee; height:5px; border-radius:3px;">
                             <div id="progressBar" style="width:0%; height:100%; background:#2ed573; border-radius:3px; transition:width 0.3s;"></div>
                         </div>
                         <small id="statusText">Uploading...</small>
                     </div>
-
                     <button type="submit" id="submitBtn" class="btn-submit">Post Review</button>
                 </form>
             </div>
@@ -199,14 +208,7 @@
                         <i class="fas fa-envelope"></i>
                         <div>
                             <h4>Email Us</h4>
-                            <p>sudippartyplanner@gmail.com</p>
-                        </div>
-                    </div>
-                    <div class="info-item">
-                        <i class="fas fa-star" style="color:#ffc107;"></i>
-                        <div>
-                            <h4>Top Rated</h4>
-                            <p>Ranked #1 on JustDial & Google</p>
+                            <p>MagicianSudip@gmail.com</p>
                         </div>
                     </div>
                 </div>
@@ -237,10 +239,10 @@
                 <div class="footer-col">
                     <h3>We Serve In</h3>
                     <ul class="location-links">
-                        <li><a href="delhi-party.html">Party Planner in Delhi</a></li>
-                        <li><a href="noida-party.html">Party Planner in Noida</a></li>
-                        <li><a href="gurgaon-party.html">Party Planner in Gurgaon</a></li>
-                        <li><a href="rohini-party.html">Party Planner in Rohini</a></li>
+                        <li><a href="delhi-party.html">Delhi</a></li>
+                        <li><a href="noida-party.html">Noida</a></li>
+                        <li><a href="gurgaon-party.html">Gurgaon</a></li>
+                        <li><a href="rohini-party.html">Rohini</a></li>
                     </ul>
                 </div>
             </div>
@@ -252,11 +254,8 @@
 
     <script type="module" src="script.js"></script>
     <script>
-        // Simple Burger Menu Logic
         const burger = document.querySelector('.burger');
         const nav = document.querySelector('.nav-links');
-        const navLinks = document.querySelectorAll('.nav-links li');
-        
         burger.addEventListener('click', () => {
             nav.classList.toggle('nav-active');
             burger.classList.toggle('toggle');

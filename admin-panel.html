@@ -3,53 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Sudip Party</title>
+    <title>Admin Login - Sudip Party</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { padding: 20px; background: #f4f4f4; }
-        .admin-container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h1 { text-align: center; margin-bottom: 20px; color: #333; }
+        body { padding: 0; margin: 0; background: #f4f4f4; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        
+        /* Login Box Styles */
+        .login-container {
+            background: white; padding: 40px; border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 400px;
+        }
+        .login-container input {
+            width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px;
+        }
+        .btn-login {
+            width: 100%; padding: 12px; background: #ff4757; color: white; border: none; 
+            border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 1rem;
+        }
+        .btn-login:hover { background: #e04050; }
+
+        /* Dashboard Styles (Hidden by default) */
+        .admin-dashboard {
+            display: none; /* HIDDEN INITIALLY */
+            width: 90%; max-width: 1200px; background: white; padding: 20px; 
+            border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin: 20px auto;
+        }
         
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: middle; }
-        th { background-color: #ff4757; color: white; }
+        th { background-color: #2f3542; color: white; }
         tr:hover { background-color: #f1f1f1; }
         
         .thumb-img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; border: 1px solid #ccc; }
-        .btn-delete { background: #ff4757; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
-        .btn-delete:hover { background: #c0392b; }
-        .stars { color: #f1c40f; }
+        .btn-delete { background: #ff4757; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; }
+        .btn-logout { background: #2f3542; color: white; padding: 8px 15px; border-radius: 5px; float: right; cursor: pointer; text-decoration: none;}
+        .error-msg { color: red; font-size: 0.9rem; margin-bottom: 10px; display: none; }
     </style>
 </head>
 <body>
 
-    <div class="admin-container">
-        <h1>Admin Review Manager</h1>
-        <p><a href="index.html" style="color:blue;">&larr; Back to Website</a></p>
+    <div id="loginSection" class="login-container">
+        <h2 style="color: #ff4757;">Admin Login</h2>
+        <p style="color: #666; margin-bottom: 20px;">Please sign in to manage reviews.</p>
         
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Name</th>
-                    <th>Rating</th>
-                    <th>Review</th>
-                    <th>Photo/Video</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="adminTableBody">
-                </tbody>
-        </table>
+        <p id="loginError" class="error-msg"></p>
+        
+        <form id="loginForm">
+            <input type="email" id="adminEmail" placeholder="Admin Email" required>
+            <input type="password" id="adminPass" placeholder="Password" required>
+            <button type="submit" class="btn-login" id="loginBtn">Login</button>
+        </form>
+    </div>
+
+    <div id="dashboardSection" class="admin-dashboard">
+        <div style="overflow: hidden; margin-bottom: 20px;">
+            <h1 style="float: left; margin: 0; color: #ff4757;">Admin Dashboard</h1>
+            <button id="logoutBtn" class="btn-logout">Logout</button>
+        </div>
+        <p>Manage customer reviews and photos.</p>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Name</th>
+                        <th>Rating</th>
+                        <th>Review Text</th>
+                        <th>Media</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="adminTableBody">
+                    </tbody>
+            </table>
+        </div>
         <p id="loadingText" style="text-align:center; margin-top:20px;">Loading data...</p>
     </div>
 
     <script type="module">
+        // Import Firebase Auth & Firestore
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, getDocs, doc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // --- PASTE YOUR CONFIG HERE ---
+        // YOUR FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyCDuau7j4CyfotHfMr0svnDY8hp10F3f3M",
             authDomain: "sudipparty-24d31.firebaseapp.com",
@@ -60,73 +98,138 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // DOM Elements
+        const loginSection = document.getElementById('loginSection');
+        const dashboardSection = document.getElementById('dashboardSection');
+        const loginForm = document.getElementById('loginForm');
+        const loginError = document.getElementById('loginError');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
         const tableBody = document.getElementById('adminTableBody');
-        const loadingText = document.getElementById('loadingText');
 
+        // --- AUTH STATE LISTENER ---
+        // This runs automatically whenever the user logs in or out
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is logged in
+                loginSection.style.display = 'none';
+                dashboardSection.style.display = 'block';
+                document.body.style.background = "#fff"; // Change bg for dashboard
+                document.body.style.display = "block";   // Reset flex display
+                loadAllReviews(); // Load data only now
+            } else {
+                // User is logged out
+                loginSection.style.display = 'block';
+                dashboardSection.style.display = 'none';
+                document.body.style.background = "#f4f4f4";
+                document.body.style.display = "flex";    // Center the login box
+            }
+        });
+
+        // --- LOGIN FUNCTION ---
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loginError.style.display = 'none';
+            loginBtn.innerText = "Checking...";
+            
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPass').value;
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                // The onAuthStateChanged above will handle the UI switch
+            } catch (error) {
+                console.error(error);
+                loginError.style.display = 'block';
+                loginError.innerText = "Invalid Email or Password.";
+                loginBtn.innerText = "Login";
+            }
+        });
+
+        // --- LOGOUT FUNCTION ---
+        logoutBtn.addEventListener('click', () => {
+            if(confirm("Are you sure you want to logout?")) {
+                signOut(auth);
+                location.reload();
+            }
+        });
+
+        // --- DATA LOADING FUNCTION ---
         async function loadAllReviews() {
-            // Get ALL reviews (Ordered by newest first)
-            const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
-            const querySnapshot = await getDocs(q);
-
-            loadingText.style.display = 'none';
+            const loadingText = document.getElementById('loadingText');
+            loadingText.style.display = 'block';
             tableBody.innerHTML = "";
 
-            querySnapshot.forEach((docSnapshot) => {
-                const data = docSnapshot.data();
-                const reviewId = docSnapshot.id;
+            try {
+                const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
 
-                // Format Date
-                let dateStr = "N/A";
-                if(data.createdAt) {
-                    dateStr = new Date(data.createdAt.seconds * 1000).toLocaleDateString();
+                loadingText.style.display = 'none';
+
+                if (querySnapshot.empty) {
+                    tableBody.innerHTML = "<tr><td colspan='6' style='text-align:center'>No reviews found.</td></tr>";
+                    return;
                 }
 
-                // Stars
-                let stars = "";
-                for(let i=1; i<=5; i++) stars += (i<=data.rating) ? '★' : '☆';
+                querySnapshot.forEach((docSnapshot) => {
+                    const data = docSnapshot.data();
+                    const reviewId = docSnapshot.id;
 
-                // Media
-                let mediaHTML = "No Media";
-                if(data.mediaURL) {
-                    if(data.mediaType === 'video') {
-                        mediaHTML = `<a href="${data.mediaURL}" target="_blank">View Video</a>`;
-                    } else {
-                        mediaHTML = `<a href="${data.mediaURL}" target="_blank"><img src="${data.mediaURL}" class="thumb-img"></a>`;
+                    // Format Date
+                    let dateStr = "N/A";
+                    if(data.createdAt) {
+                        dateStr = new Date(data.createdAt.seconds * 1000).toLocaleDateString();
                     }
-                }
 
-                const row = `
-                    <tr>
-                        <td>${dateStr}</td>
-                        <td><strong>${data.name}</strong></td>
-                        <td><span class="stars">${stars}</span></td>
-                        <td>${data.text}</td>
-                        <td>${mediaHTML}</td>
-                        <td>
-                            <button class="btn-delete" onclick="deleteReview('${reviewId}')">Delete</button>
-                        </td>
-                    </tr>
-                `;
-                tableBody.innerHTML += row;
-            });
-        }
+                    // Stars
+                    let stars = "";
+                    for(let i=1; i<=5; i++) stars += (i<=data.rating) ? '★' : '☆';
 
-        // Expose function to window so the HTML button works
-        window.deleteReview = async function(id) {
-            if(confirm("Are you sure you want to delete this review? It cannot be undone.")) {
-                try {
-                    await deleteDoc(doc(db, "reviews", id));
-                    alert("Deleted!");
-                    location.reload(); // Refresh table
-                } catch(e) {
-                    alert("Error deleting: " + e.message);
-                }
+                    // Media
+                    let mediaHTML = "No Media";
+                    if(data.mediaURL) {
+                        if(data.mediaType === 'video') {
+                            mediaHTML = `<a href="${data.mediaURL}" target="_blank" style="color:blue">View Video</a>`;
+                        } else {
+                            mediaHTML = `<a href="${data.mediaURL}" target="_blank"><img src="${data.mediaURL}" class="thumb-img"></a>`;
+                        }
+                    }
+
+                    const row = `
+                        <tr>
+                            <td>${dateStr}</td>
+                            <td><strong>${data.name}</strong></td>
+                            <td style="color:#f1c40f">${stars}</td>
+                            <td>${data.text}</td>
+                            <td>${mediaHTML}</td>
+                            <td>
+                                <button class="btn-delete" onclick="deleteReview('${reviewId}')">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+            } catch (error) {
+                console.error("Error loading data:", error);
+                loadingText.innerText = "Error loading data. Check console.";
             }
         }
 
-        loadAllReviews();
+        // Global Delete Function
+        window.deleteReview = async function(id) {
+            if(confirm("Permanently delete this review?")) {
+                try {
+                    await deleteDoc(doc(db, "reviews", id));
+                    // Reload data without refreshing page
+                    loadAllReviews();
+                } catch(e) {
+                    alert("Error: " + e.message);
+                }
+            }
+        }
     </script>
 </body>
 </html>

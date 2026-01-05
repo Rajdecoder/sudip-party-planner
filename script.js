@@ -22,15 +22,14 @@ const storage = getStorage(app);
 let currentCategory = 'All';
 let lastGalleryVisible = null;
 const GALLERY_BATCH_SIZE = 10;
-let currentGalleryItems = []; // Stores loaded items for Lightbox
+let currentGalleryItems = []; 
 
 // --- 1. FILTER FUNCTION ---
 window.filterGallery = function(category) {
     currentCategory = category;
-    lastGalleryVisible = null; // Reset pagination
-    currentGalleryItems = []; // Clear local list
+    lastGalleryVisible = null; 
+    currentGalleryItems = []; 
     
-    // Update Buttons UI
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.remove('active');
         if(btn.innerText.includes(category) || (category === 'All' && btn.innerText === 'All')) {
@@ -38,11 +37,9 @@ window.filterGallery = function(category) {
         }
     });
 
-    // Clear Grid
     const galleryContainer = document.getElementById('dynamicGallery');
     if(galleryContainer) galleryContainer.innerHTML = "<p style='text-align:center; width:100%;'>Loading...</p>";
     
-    // Reload
     loadUserGallery();
 }
 
@@ -56,7 +53,7 @@ async function loadUserGallery() {
         let q;
         const colRef = collection(db, "gallery");
 
-        // Build Query based on Category
+        // QUERY LOGIC
         if (currentCategory === 'All') {
             if (!lastGalleryVisible) {
                 q = query(colRef, orderBy("createdAt", "desc"), limit(GALLERY_BATCH_SIZE));
@@ -64,7 +61,8 @@ async function loadUserGallery() {
                 q = query(colRef, orderBy("createdAt", "desc"), startAfter(lastGalleryVisible), limit(GALLERY_BATCH_SIZE));
             }
         } else {
-            // Filtered Query (Note: Requires Index in Firestore if combining where + orderBy)
+            // NOTE: This filtered query REQUIRES a Composite Index in Firebase Console.
+            // If you get an error in console, CLICK THE LINK in the error message to create it.
             if (!lastGalleryVisible) {
                 q = query(colRef, where("eventType", "==", currentCategory), orderBy("createdAt", "desc"), limit(GALLERY_BATCH_SIZE));
             } else {
@@ -74,7 +72,6 @@ async function loadUserGallery() {
 
         const snapshot = await getDocs(q);
 
-        // Clear "Loading" text on first load
         if (!lastGalleryVisible && galleryContainer.innerHTML.includes('Loading')) {
             galleryContainer.innerHTML = "";
         }
@@ -89,19 +86,16 @@ async function loadUserGallery() {
             lastGalleryVisible = snapshot.docs[snapshot.docs.length - 1];
         }
 
-        // Render Items
-        let startIndex = currentGalleryItems.length; // Index offset for new items
+        let startIndex = currentGalleryItems.length;
         
         snapshot.forEach((doc) => {
             const data = doc.data();
-            currentGalleryItems.push(data); // Add to global list for lightbox
+            currentGalleryItems.push(data);
             
             const card = document.createElement('div');
             card.className = 'gallery-card';
             
             // On Click -> Open Lightbox at this index
-            const clickEvent = `openLightbox(${startIndex})`;
-
             if (data.mediaType === 'video') {
                 card.innerHTML = `<video src="${data.mediaURL}#t=1.0" preload="metadata" style="width:100%; height:100%; object-fit:cover;"></video>
                                   <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:white; font-size:30px; pointer-events:none;"><i class="fas fa-play-circle"></i></div>`;
@@ -115,20 +109,20 @@ async function loadUserGallery() {
             startIndex++;
         });
 
-        // Toggle Load More Button
         if (loadMoreBtn) {
             loadMoreBtn.style.display = (snapshot.docs.length < GALLERY_BATCH_SIZE) ? 'none' : 'block';
-            // Re-attach listener to avoid duplicates
             loadMoreBtn.onclick = null;
             loadMoreBtn.onclick = loadUserGallery;
         }
 
     } catch (error) {
         console.error("Gallery Error:", error);
-        // If index error, fallback (removes orderBy temporarily)
+        
+        // --- FIXED: Log the link to console instead of alerting the user ---
         if(error.message.includes("index")) {
-            console.log("Index missing, alerting user.");
-            alert("Admin Note: Please create the Firestore Index from the link in console to enable sorting with filtering.");
+            console.log("%c ADMIN ACTION REQUIRED: Click the link below to create the index:", "color: red; font-size: 14px; font-weight: bold;");
+            // The link is actually inside the 'error' object logged above.
+            // Check the console to find the blue link starting with https://console.firebase.google.com...
         }
     }
 }
@@ -149,14 +143,12 @@ window.openLightbox = function(index) {
 
 window.closeLightbox = function() {
     document.getElementById('lightbox').style.display = 'none';
-    // Stop video if playing
     const container = document.getElementById('lightbox-container');
     container.innerHTML = "";
 }
 
 window.changeSlide = function(n) {
     currentSlideIndex += n;
-    // Loop navigation
     if (currentSlideIndex >= currentGalleryItems.length) currentSlideIndex = 0;
     if (currentSlideIndex < 0) currentSlideIndex = currentGalleryItems.length - 1;
     showLightboxContent();
@@ -175,15 +167,12 @@ function showLightboxContent() {
     }
 }
 
-// Close lightbox on outside click
 document.getElementById('lightbox').addEventListener('click', (e) => {
     if(e.target.id === 'lightbox') window.closeLightbox();
 });
 
 
 // --- 4. REVIEW & STAR RATING LOGIC ---
-
-// Star Rating UI
 const stars = document.querySelectorAll('#starRatingInput i');
 const ratingValue = document.getElementById('selectedRating');
 
@@ -198,15 +187,12 @@ if(stars.length > 0) {
             });
         });
     });
-    // Set default visual to 5 stars
     stars.forEach(s => s.style.color = "#ffc107");
 }
 
-// Review Submission
 const reviewForm = document.getElementById('reviewForm');
 const fileInput = document.getElementById('reviewMedia');
 
-// Helper: Image Compression
 async function compressImage(file) {
     if (file.type.startsWith('video/')) return file;
     return new Promise((resolve) => {
@@ -229,7 +215,6 @@ async function compressImage(file) {
     });
 }
 
-// Submit Listener
 if(reviewForm) {
     const submitBtn = document.getElementById('submitBtn');
     const progressBar = document.getElementById('progressBar');
@@ -327,11 +312,9 @@ async function loadReviews() {
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             
-            // Generate Stars HTML
             let stars = "";
             for(let i=1; i<=5; i++) stars += (i<=data.rating) ? '<i class="fas fa-star" style="color:#f1c40f"></i>' : '<i class="fas fa-star" style="color:#ccc"></i>';
 
-            // Generate Media HTML
             let media = "";
             if(data.mediaURL) {
                 const content = (data.mediaType === 'video') 
@@ -367,7 +350,6 @@ async function loadReviews() {
     }
 }
 
-// Initial Review Load
 if(loadReviewsBtn) loadReviewsBtn.addEventListener('click', loadReviews);
 loadReviews();
 
@@ -403,7 +385,7 @@ window.sendBooking = function(type) {
     }
 };
 
-// --- 7. PREVIEW LOGIC (User Review Upload) ---
+// --- 7. PREVIEW LOGIC ---
 const previewContainer = document.getElementById('previewContainer');
 const imagePreview = document.getElementById('imagePreview');
 const videoPreview = document.getElementById('videoPreview');

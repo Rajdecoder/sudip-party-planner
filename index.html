@@ -4,19 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+
     <title>Sudip Party Planner | Best Birthday & Event Organiser in Delhi NCR</title>
-    <meta name="description" content="Looking for the best party planner in Delhi NCR? We organize Birthday Parties, Magic Shows, Game Stalls & Decor in Rohini, Pitampura, Noida & Gurgaon. Call 7530886327.">
-    <meta name="keywords" content="Birthday Party Planner Delhi, Magic Show, Bull Ride, Bumper Cars, Water Pool, Carnival Games, Hammer Machine, Kids Party Delhi">
-    
+    <meta name="description"
+        content="Looking for the best party planner in Delhi NCR? We organize Birthday Parties, Magic Shows, Game Stalls & Decor in Rohini, Pitampura, Noida & Gurgaon. Call 7530886327.">
+    <meta name="keywords"
+        content="Birthday Party Planner Delhi, Magic Show, Bull Ride, Bumper Cars, Water Pool, Carnival Games, Hammer Machine, Kids Party Delhi">
+
     <meta property="og:title" content="Sudip Party Planner - Delhi's #1 Event Team">
     <meta property="og:description" content="Book the best magic shows, games, and decoration for your next event.">
-    <meta property="og:image" content="https://sudippartyplanner.in/your-logo.jpg"> 
+    <meta property="og:image" content="https://sudippartyplanner.in/your-logo.jpg">
     <meta property="og:url" content="https://sudippartyplanner.in">
 
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -62,7 +64,8 @@
                     <li><a href="#gallery">Gallery</a></li>
                     <li><a href="#reviews">Reviews</a></li>
                     <li><a href="#contact">Contact</a></li>
-                    <li><a href="brochure.pdf" download class="btn-download"><i class="fas fa-file-pdf"></i> Catalog</a></li>
+                    <li><a href="brochure.pdf" download class="btn-download"><i class="fas fa-file-pdf"></i> Catalog</a>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -84,7 +87,7 @@
         <div class="container">
             <h2 class="section-title">Our Premium Services</h2>
             <p class="section-subtitle">Everything you need for a perfect party</p>
-            
+
             <div class="games-grid">
                 <div class="game-card">
                     <div class="icon-box"><i class="fas fa-magic"></i></div>
@@ -113,12 +116,13 @@
     <section class="section-padding">
         <div class="container">
             <h3 style="text-align: center; margin-bottom: 20px;">We Offer 50+ Unique Activities</h3>
-            
+
             <p style="text-align: center; margin-bottom: 30px; color: #666; font-size: 1.1rem;">
-                Browse our full catalog in the 
-                <a href="brochure.pdf" download class="text-link"><i class="fas fa-download"></i> Brochure PDF</a>, featuring:
+                Browse our full catalog in the
+                <a href="brochure.pdf" download class="text-link"><i class="fas fa-download"></i> Brochure PDF</a>,
+                featuring:
             </p>
-            
+
             <div class="seo-game-list" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
                 <span class="tag">Hammer Machine</span> <span class="tag">Punching Machine</span>
                 <span class="tag">Electronic Basketball</span> <span class="tag">Bowling Machine</span>
@@ -142,26 +146,46 @@
     <section id="gallery" class="section-padding bg-light">
         <div class="container">
             <h2 class="section-title">Event Gallery</h2>
-            <p style="text-align: center; margin-bottom: 30px; color: #666;">Highlights from our recent parties and events.</p>
+            <p style="text-align: center; margin-bottom: 30px; color: #666;">Highlights from our recent parties and
+                events.</p>
             <div id="dynamicGallery" class="dynamic-gallery-grid">
                 <p style="text-align:center; width:100%;">Loading Photos...</p>
             </div>
-            <button id="loadMoreGalleryBtn" class="load-more-btn" style="display: none; margin: 30px auto;">Load More Photos</button>
+            <button id="loadMoreGalleryBtn" class="load-more-btn" style="display: none; margin: 30px auto;">Load More
+                Photos</button>
         </div>
     </section>
 
     <section id="reviews" class="section-padding">
         <div class="container">
             <h2 class="section-title">Happy Clients</h2>
-            <div id="reviewsContainer" class="reviews-grid"></div>
+            <p class="section-subtitle">Rated 4.9/5 on Google & JustDial</p>
+
+            <div class="google-review-box"
+                style="text-align: center; margin-bottom: 40px; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #eee;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google"
+                    style="width: 40px; margin-bottom: 10px;">
+                <h3 style="margin-bottom: 10px;">Loved our Party?</h3>
+                <p style="margin-bottom: 20px; color: #666;">Please leave us a review on Google. It helps us reach more
+                    families!</p>
+
+                <a href="https://search.google.com/local/writereview?placeid=ChIJadxE-F4HDTkR3ahbDeqRwZk"
+                    target="_blank" class="btn-google-review">
+                    <i class="fas fa-star"></i> Write a Review on Google
+                </a>
+            </div>
+
+            <div id="reviewsContainer" class="reviews-grid">
+            </div>
+
             <button id="loadMoreBtn" class="load-more-btn">Read More Reviews</button>
-            
+
             <div class="add-review-box">
-                <h3><i class="fas fa-pen"></i> Write a Review</h3>
+                <h3><i class="fas fa-pen"></i> Write a Testimonial (Website Only)</h3>
                 <form id="reviewForm">
                     <input type="text" id="reviewerName" placeholder="Your Name" required>
                     <textarea id="reviewerText" placeholder="How was your experience?" required></textarea>
-                    
+
                     <div class="rating-box">
                         <label>Rating:</label>
                         <div class="stars-input" id="starRatingInput">
@@ -182,11 +206,14 @@
                     </div>
                     <div id="previewContainer" style="display:none; margin-top:10px;">
                         <img id="imagePreview" style="max-width: 100px; display:none; border-radius:5px;">
-                        <video id="videoPreview" style="max-width: 100px; display:none; border-radius:5px;" controls></video>
+                        <video id="videoPreview" style="max-width: 100px; display:none; border-radius:5px;"
+                            controls></video>
                     </div>
                     <div id="uploadStatus" style="display:none; margin-top:10px;">
                         <div style="width:100%; background:#eee; height:5px; border-radius:3px;">
-                            <div id="progressBar" style="width:0%; height:100%; background:#2ed573; border-radius:3px; transition:width 0.3s;"></div>
+                            <div id="progressBar"
+                                style="width:0%; height:100%; background:#2ed573; border-radius:3px; transition:width 0.3s;">
+                            </div>
                         </div>
                         <small id="statusText">Uploading...</small>
                     </div>
@@ -308,4 +335,5 @@
         });
     </script>
 </body>
+
 </html>

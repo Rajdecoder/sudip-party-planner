@@ -148,11 +148,45 @@ header {
 .btn-call { background: var(--primary-color); }
 .btn-whatsapp { background: var(--secondary-color); }
 
-.main-footer { background: var(--dark-color); color: #ccc; padding: 50px 0 20px; }
+/* --- FIXED FOOTER COLORS & HOVER --- */
+.main-footer { 
+    background: var(--dark-color); 
+    color: #dfe6e9; /* Light Grey Text */
+    padding: 60px 0 20px; 
+}
 .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; margin-bottom: 40px; }
-.footer-col h3 { color: white; margin-bottom: 20px; }
-.footer-col ul li { margin-bottom: 10px; }
-.footer-col a:hover { color: var(--primary-color); padding-left: 5px; }
+
+.footer-col h3 { 
+    color: white; 
+    margin-bottom: 25px; 
+    position: relative;
+}
+/* Underline for footer headings */
+.footer-col h3::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -8px;
+    width: 40px;
+    height: 3px;
+    background: var(--primary-color);
+}
+.footer-col ul li { margin-bottom: 12px; }
+
+/* FIX: Footer Links Color */
+.footer-col ul li a { 
+    color: #b2bec3 !important; 
+    text-decoration: none;
+    transition: 0.3s;
+    display: inline-block;
+}
+/* Hover Effect */
+.footer-col ul li a:hover { 
+    color: var(--primary-color) !important; 
+    padding-left: 8px; 
+    text-shadow: 0px 0px 10px rgba(255, 71, 87, 0.6);
+}
+
 .footer-bottom { text-align: center; border-top: 1px solid #444; padding-top: 20px; font-size: 0.9rem; }
 
 /* 7. Gallery Grid */
@@ -174,18 +208,6 @@ header {
 }
 .load-more-btn:hover { background: var(--primary-color); color: white; }
 
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-    .nav-links {
-        position: absolute; right: 0; height: 92vh; top: 70px; background: white;
-        display: flex; flex-direction: column; align-items: center; width: 60%;
-        transform: translateX(100%); transition: 0.5s; box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-    }
-    .nav-active { transform: translateX(0%); }
-    .burger { display: block; }
-    .hero h1 { font-size: 2.2rem; }
-    .contact-info { flex-direction: column; align-items: center; gap: 20px; }
-}
 /* SEO Tag Styling */
 .tag {
     background: #f1f2f6;
@@ -203,8 +225,6 @@ header {
 }
 
 /* --- NEW ADDITIONS FOR BOOKING FORM & BROCHURE --- */
-
-/* Text Link Style for Brochure */
 .text-link {
     color: var(--primary-color);
     font-weight: 700;
@@ -212,33 +232,39 @@ header {
 }
 .text-link:hover { color: var(--primary-dark); }
 
-/* Contact Section Layout */
+/* --- FIXED CONTACT SECTION (No White Space) --- */
 .contact-grid-layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 40px;
+    gap: 30px;
     margin-top: 30px;
-    align-items: start;
+    align-items: stretch; /* FIX: Makes both boxes equal height */
 }
 
 /* Info Box Styling */
 .contact-info-box {
     display: flex;
     flex-direction: column;
+    justify-content: center; /* Centers text vertically */
     gap: 30px;
     background: white;
-    padding: 30px;
+    padding: 40px; /* Increased padding */
     border-radius: 15px;
     box-shadow: var(--shadow);
+    height: 100%; /* Fills the height */
 }
 
 /* Booking Form Styling */
 .booking-form-box {
     background: white;
-    padding: 30px;
+    padding: 40px; /* Increased padding */
     border-radius: 15px;
     box-shadow: var(--shadow);
     border-top: 5px solid var(--primary-color);
+    height: 100%; /* Fills the height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 .booking-form-box h3 {
     text-align: center;
@@ -279,8 +305,17 @@ header {
 .btn-email-book { background-color: #ff4757; }
 .btn-email-book:hover { background-color: #e84118; }
 
-/* Mobile Responsiveness for Contact Grid */
+/* Mobile Responsiveness */
 @media (max-width: 768px) {
+    .nav-links {
+        position: absolute; right: 0; height: 92vh; top: 70px; background: white;
+        display: flex; flex-direction: column; align-items: center; width: 60%;
+        transform: translateX(100%); transition: 0.5s; box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+    }
+    .nav-active { transform: translateX(0%); }
+    .burger { display: block; }
+    .hero h1 { font-size: 2.2rem; }
+    
     .contact-grid-layout {
         grid-template-columns: 1fr; /* Stack on mobile */
     }

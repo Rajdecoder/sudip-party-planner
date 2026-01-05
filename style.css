@@ -156,20 +156,23 @@ header {
 }
 .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; margin-bottom: 40px; }
 
+/* Footer Headings */
 .footer-col h3 { 
     color: white; 
     margin-bottom: 25px; 
     position: relative;
+    display: inline-block; /* Makes underline fit text length */
 }
-/* Underline for footer headings */
+/* Adjustable Underline */
 .footer-col h3::after {
     content: '';
     position: absolute;
     left: 0;
     bottom: -8px;
-    width: 40px;
+    width: 100%; /* Stretches to match text exactly */
     height: 3px;
     background: var(--primary-color);
+    border-radius: 2px;
 }
 .footer-col ul li { margin-bottom: 12px; }
 

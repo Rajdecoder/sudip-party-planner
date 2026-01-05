@@ -26,7 +26,7 @@ if(stars.length > 0) {
     stars.forEach(star => {
         star.addEventListener('click', () => {
             const val = star.getAttribute('data-value');
-            ratingValue.value = val;
+            if(ratingValue) ratingValue.value = val;
             
             stars.forEach(s => {
                 s.style.color = (s.getAttribute('data-value') <= val) ? "#ffc107" : "#ccc";
@@ -91,26 +91,36 @@ if(fileInput) {
     fileInput.addEventListener('change', function() {
         const file = this.files[0];
         if (file) {
-            previewContainer.style.display = 'block';
+            if(previewContainer) previewContainer.style.display = 'block';
             if(fileNameDisplay) fileNameDisplay.textContent = "Selected: " + file.name;
             if(uploadBtnText) uploadBtnText.textContent = "Change File";
             
-            imagePreview.style.display = 'none';
-            videoPreview.style.display = 'none';
+            if(imagePreview) {
+                imagePreview.style.display = 'none';
+                imagePreview.src = "";
+            }
+            if(videoPreview) {
+                videoPreview.style.display = 'none';
+                videoPreview.src = "";
+            }
 
             if (file.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    imagePreview.src = e.target.result;
-                    imagePreview.style.display = 'inline-block';
+                    if(imagePreview) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'inline-block';
+                    }
                 }
                 reader.readAsDataURL(file);
             } else if (file.type.startsWith('video/')) {
-                videoPreview.src = URL.createObjectURL(file);
-                videoPreview.style.display = 'block';
+                if(videoPreview) {
+                    videoPreview.src = URL.createObjectURL(file);
+                    videoPreview.style.display = 'block';
+                }
             }
         } else {
-            previewContainer.style.display = 'none';
+            if(previewContainer) previewContainer.style.display = 'none';
         }
     });
 }
@@ -184,23 +194,15 @@ if(reviewForm) {
     });
 }
 
-// --- 6. Load Reviews (WITH FRAME FIX) ---
+// --- 6. Load Reviews (CORRECT PUBLIC CARD VERSION) ---
 const reviewsContainer = document.getElementById('reviewsContainer');
 const loadMoreBtn = document.getElementById('loadMoreBtn');
 let lastVisible = null;
 const BATCH_SIZE = 5; 
 
-// --- 6. Load Reviews (CORRECT PUBLIC VERSION) ---
 async function loadReviews() {
-    const reviewsContainer = document.getElementById('reviewsContainer');
-    const loadMoreBtn = document.getElementById('loadMoreBtn');
-    
+    // Safety check: If we are on the Admin page, this container won't exist, so stop.
     if(!reviewsContainer) return;
-
-    // Reset container if it's the first load
-    if (!lastVisible) {
-        reviewsContainer.innerHTML = "";
-    }
 
     let q;
     if (!lastVisible) {
@@ -225,11 +227,11 @@ async function loadReviews() {
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             
-            // Stars Logic
+            // Generate Stars HTML
             let stars = "";
             for(let i=1; i<=5; i++) stars += (i<=data.rating) ? '<i class="fas fa-star" style="color:#f1c40f"></i>' : '<i class="fas fa-star" style="color:#ccc"></i>';
 
-            // Media Logic (Public Card Style)
+            // Generate Media HTML (Card Style)
             let media = "";
             if(data.mediaURL) {
                 const content = (data.mediaType === 'video') 
@@ -238,7 +240,7 @@ async function loadReviews() {
                 media = `<div class="media-frame">${content}</div>`;
             }
 
-            // Create the Card (Not a Table Row!)
+            // Create the Card Element
             const div = document.createElement("div");
             div.className = "review-card";
             div.innerHTML = `
@@ -263,8 +265,17 @@ async function loadReviews() {
 
     } catch (error) {
         console.error("Error loading reviews:", error);
+        if(error.message.includes("index")) {
+            console.warn("⚠️ ACTION REQUIRED: Open browser console and click the Firebase Index creation link.");
+        }
     }
 }
+
+// Initial Load
+if(loadMoreBtn) {
+    loadMoreBtn.addEventListener('click', loadReviews);
+}
+loadReviews();
 
 
 // --- 7. LOAD DYNAMIC GALLERY (User Side) ---
@@ -273,7 +284,6 @@ const galleryContainer = document.getElementById('dynamicGallery');
 async function loadUserGallery() {
     if (!galleryContainer) return;
 
-    // Get gallery items sorted by newest
     const q = query(collection(db, "gallery"), orderBy("createdAt", "desc"), limit(20)); 
 
     try {
@@ -305,5 +315,4 @@ async function loadUserGallery() {
     }
 }
 
-// Call this function
 loadUserGallery();

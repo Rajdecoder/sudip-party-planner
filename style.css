@@ -108,7 +108,7 @@ header {
     font-size: 2rem; margin: 0 auto 20px;
 }
 
-/* --- WHATSAPP CTA BUTTON (New Professional Look) --- */
+/* --- WHATSAPP CTA BUTTON --- */
 .btn-whatsapp-cta {
     display: inline-flex;
     align-items: center;
@@ -134,26 +134,15 @@ header {
 
 .btn-whatsapp-cta i { font-size: 1.4rem; }
 
-
 /* --- STICKY FLOATING CONTACT BAR --- */
 .sticky-contact-bar {
     position: fixed;
-    top: 50%;
-    right: 0;
-    transform: translateY(-50%);
+    bottom: 20px;
+    right: 20px;
     z-index: 2000;
     display: flex;
     flex-direction: column;
     gap: 10px;
-}
-
-/* Use standard "stick to scrollbar" approach (Bottom Right corner usually preferred for mobile friendliness, or Center Right) */
-/* The user asked for "Left side to the scroll bar". Scroll bar is on Right. So we stick to Right Edge. */
-.sticky-contact-bar {
-    top: auto;
-    bottom: 20px;
-    right: 20px;
-    transform: none;
 }
 
 .float-btn {
@@ -176,7 +165,6 @@ header {
 .float-btn.call { background-color: var(--call-color); }
 .float-btn.call:hover { background-color: #0c7cd5; transform: scale(1.1); }
 
-/* Tooltip for floating buttons */
 .float-btn::after {
     content: attr(data-tooltip);
     position: absolute;
@@ -222,11 +210,63 @@ header {
 }
 .load-more-btn:hover { background: var(--primary-color); color: white; }
 
+/* --- REVIEW FORM & INPUTS --- */
 .add-review-box {
-    max-width: 600px; margin: 0 auto; background: white; padding: 30px;
+    max-width: 600px; margin: 0 auto; background: white; padding: 40px;
     border-radius: 15px; box-shadow: var(--shadow); border: 1px solid #eee;
     clear: both;
 }
+
+.form-group { width: 100%; margin-bottom: 15px; }
+
+/* Global Input Styling for Forms */
+.form-group input, 
+.form-group select, 
+.form-group textarea {
+    width: 100%; 
+    padding: 12px 15px; 
+    border: 1px solid #ddd; 
+    border-radius: 8px; 
+    font-family: inherit; 
+    font-size: 0.95rem;
+    background-color: #fcfcfc;
+    transition: 0.3s;
+}
+
+.form-group input:focus, 
+.form-group textarea:focus {
+    border-color: var(--primary-color);
+    background-color: #fff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(255, 71, 87, 0.2);
+}
+
+/* Star Rating Styling */
+.stars-input { display: inline-block; font-size: 1.2rem; cursor: pointer; }
+.stars-input i {
+    font-size: 2rem; /* Larger stars */
+    margin: 0 5px;
+    transition: transform 0.2s;
+}
+.stars-input i:hover { transform: scale(1.2); }
+
+/* File Upload Button Styling */
+.file-upload-box { text-align: center; margin-bottom: 15px; }
+.file-upload-label {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #e3f2fd;
+    color: #1976d2;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: 1px dashed #1976d2;
+    transition: 0.3s;
+    text-align: center;
+}
+.file-upload-label:hover { background-color: #bbdefb; }
 
 /* --- CONTACT & ENQUIRY --- */
 .contact-grid-layout {
@@ -256,11 +296,7 @@ header {
 .contact-info-box .info-item:last-child { margin-bottom: 0; }
 .info-item i { font-size: 1.5rem; color: var(--primary-color); }
 
-.form-group input, .form-group select, .add-review-box textarea {
-    width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px;
-    font-family: inherit; font-size: 0.95rem;
-}
-.booking-actions { display: flex; gap: 10px; margin-top: auto; }
+.booking-actions { display: flex; gap: 10px; margin-top: 10px; }
 
 .btn-whatsapp-book, .btn-email-book, .btn-submit {
     flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;

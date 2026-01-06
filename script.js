@@ -1,7 +1,7 @@
 // Import Firebase SDKs
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { addDoc, collection, getDocs, getFirestore, limit, orderBy, query, serverTimestamp, startAfter, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, startAfter, serverTimestamp, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 // --- YOUR FIREBASE CONFIGURATION ---
 const firebaseConfig = {
@@ -30,7 +30,6 @@ window.filterGallery = function(category) {
     lastGalleryVisible = null; 
     currentGalleryItems = []; 
     
-    // Update Active Button State
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.remove('active');
         if(btn.innerText.includes(category) || (category === 'All' && btn.innerText === 'All')) {
@@ -54,7 +53,6 @@ async function loadUserGallery() {
         let q;
         const colRef = collection(db, "gallery");
 
-        // QUERY LOGIC
         if (currentCategory === 'All') {
             if (!lastGalleryVisible) {
                 q = query(colRef, orderBy("createdAt", "desc"), limit(GALLERY_BATCH_SIZE));
@@ -71,7 +69,6 @@ async function loadUserGallery() {
 
         const snapshot = await getDocs(q);
 
-        // Clear "Loading" text
         if (!lastGalleryVisible && galleryContainer.innerHTML.includes('Loading')) {
             galleryContainer.innerHTML = "";
         }
@@ -112,8 +109,6 @@ async function loadUserGallery() {
 
         if (loadMoreBtn) {
             loadMoreBtn.style.display = (snapshot.docs.length < GALLERY_BATCH_SIZE) ? 'none' : 'block';
-            
-            // Remove old listener to prevent duplicates
             const newBtn = loadMoreBtn.cloneNode(true);
             loadMoreBtn.parentNode.replaceChild(newBtn, loadMoreBtn);
             newBtn.addEventListener('click', loadUserGallery);
@@ -127,24 +122,46 @@ async function loadUserGallery() {
     }
 }
 
-// Initial Load
 loadUserGallery();
 
 
-// --- 3. LIGHTBOX LOGIC ---
+// --- 3. LIGHTBOX LOGIC (WITH TOUCH & SINGLE VIEW SUPPORT) ---
 let currentSlideIndex = 0;
 
+// Open Gallery Lightbox (With Navigation)
 window.openLightbox = function(index) {
     currentSlideIndex = index;
     const lightbox = document.getElementById('lightbox');
+    
+    // Show arrows for gallery mode
+    document.querySelector('.lightbox-prev').style.display = 'block';
+    document.querySelector('.lightbox-next').style.display = 'block';
+    
     lightbox.style.display = 'flex';
     showLightboxContent();
 }
 
+// Open Single Media Lightbox (For Reviews - No Navigation)
+window.openMediaViewer = function(url, type) {
+    const lightbox = document.getElementById('lightbox');
+    const container = document.getElementById('lightbox-container');
+    
+    // Hide arrows for single view
+    document.querySelector('.lightbox-prev').style.display = 'none';
+    document.querySelector('.lightbox-next').style.display = 'none';
+    
+    lightbox.style.display = 'flex';
+    
+    if (type === 'video') {
+        container.innerHTML = `<video src="${url}" controls autoplay class="lightbox-content"></video>`;
+    } else {
+        container.innerHTML = `<img src="${url}" class="lightbox-content">`;
+    }
+}
+
 window.closeLightbox = function() {
     document.getElementById('lightbox').style.display = 'none';
-    const container = document.getElementById('lightbox-container');
-    container.innerHTML = "";
+    document.getElementById('lightbox-container').innerHTML = "";
 }
 
 window.changeSlide = function(n) {
@@ -172,46 +189,142 @@ function showLightboxContent() {
     }
 }
 
-// Close on background click
-const lb = document.getElementById('lightbox');
-if(lb) {
-    lb.addEventListener('click', (e) => {
-        if(e.target.id === 'lightbox') window.closeLightbox();
-    });
-}
-
-// --- NEW: KEYBOARD SUPPORT (Arrow Keys & Escape) ---
+// KEYBOARD NAVIGATION
 document.addEventListener('keydown', function(event) {
     const lightbox = document.getElementById('lightbox');
-    // Only work if lightbox is visible
     if (lightbox && lightbox.style.display === 'flex') {
-        if (event.key === 'ArrowLeft') {
-            window.changeSlide(-1);
-        } else if (event.key === 'ArrowRight') {
-            window.changeSlide(1);
-        } else if (event.key === 'Escape') {
-            window.closeLightbox();
-        }
+        if (event.key === 'ArrowLeft') window.changeSlide(-1);
+        if (event.key === 'ArrowRight') window.changeSlide(1);
+        if (event.key === 'Escape') window.closeLightbox();
     }
 });
 
+// TOUCH SWIPE NAVIGATION
+let touchStartX = 0;
+let touchEndX = 0;
+const lightboxEl = document.getElementById('lightbox');
 
-// --- 4. REVIEW & STAR RATING LOGIC ---
-const stars = document.querySelectorAll('#starRatingInput i');
+if(lightboxEl) {
+    lightboxEl.addEventListener('click', (e) => {
+        if(e.target.id === 'lightbox') window.closeLightbox();
+    });
+
+    lightboxEl.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+
+    lightboxEl.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    });
+}
+
+function handleSwipe() {
+    // Only swipe if arrows are visible (meaning we are in gallery mode)
+    if(document.querySelector('.lightbox-next').style.display === 'none') return;
+
+    const threshold = 50; // Minimum distance for swipe
+    if (touchEndX < touchStartX - threshold) {
+        window.changeSlide(1); // Swipe Left -> Next
+    }
+    if (touchEndX > touchStartX + threshold) {
+        window.changeSlide(-1); // Swipe Right -> Prev
+    }
+}
+
+
+// --- 4. REVIEWS LOAD (With Click-to-View) ---
+const reviewsContainer = document.getElementById('reviewsContainer');
+const loadReviewsBtn = document.getElementById('loadMoreBtn');
+let lastReviewVisible = null;
+const REVIEW_BATCH_SIZE = 5; 
+
+async function loadReviews() {
+    if(!reviewsContainer) return;
+
+    let q;
+    if (!lastReviewVisible) {
+        q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), limit(REVIEW_BATCH_SIZE));
+    } else {
+        q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), startAfter(lastReviewVisible), limit(REVIEW_BATCH_SIZE));
+    }
+
+    try {
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty && !lastReviewVisible) {
+            reviewsContainer.innerHTML = "<p style='text-align:center;'>No reviews yet. Be the first!</p>";
+            if(loadReviewsBtn) loadReviewsBtn.style.display = 'none';
+            return;
+        }
+
+        if (!querySnapshot.empty) {
+            lastReviewVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+        }
+
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            
+            let stars = "";
+            for(let i=1; i<=5; i++) stars += (i<=data.rating) ? '<i class="fas fa-star" style="color:#f1c40f"></i>' : '<i class="fas fa-star" style="color:#ccc"></i>';
+
+            let media = "";
+            if(data.mediaURL) {
+                // MODIFIED: Added onclick event to open in lightbox
+                const clickAction = `onclick="window.openMediaViewer('${data.mediaURL}', '${data.mediaType}')"`;
+                
+                const content = (data.mediaType === 'video') 
+                    ? `<video src="${data.mediaURL}" style="max-width:100%; border-radius:5px; margin-top:10px; cursor:pointer;" ${clickAction}></video>` 
+                    : `<img src="${data.mediaURL}" alt="User Review" style="max-width:100%; border-radius:5px; margin-top:10px; cursor:pointer;" ${clickAction}>`;
+                media = `<div class="media-frame">${content}</div>`;
+            }
+
+            const div = document.createElement("div");
+            div.className = "review-card";
+            div.innerHTML = `
+                <div class="review-header">
+                    <div style="width:40px; height:40px; background:#ff4757; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; margin-right:10px;">
+                        ${data.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                        <h4 style="margin:0;">${data.name}</h4>
+                        <div class="stars">${stars}</div>
+                    </div>
+                </div>
+                <p class="review-text">"${data.text}"</p>
+                ${media}
+            `;
+            reviewsContainer.appendChild(div);
+        });
+
+        if(loadReviewsBtn) {
+            loadReviewsBtn.style.display = (querySnapshot.docs.length < REVIEW_BATCH_SIZE) ? 'none' : 'block';
+        }
+
+    } catch (error) {
+        console.error("Error loading reviews:", error);
+    }
+}
+
+if(loadReviewsBtn) loadReviewsBtn.addEventListener('click', loadReviews);
+loadReviews();
+
+
+// --- 5. REVIEW FORM & BOOKING (Same as before) ---
+const starsInput = document.querySelectorAll('#starRatingInput i');
 const ratingValue = document.getElementById('selectedRating');
 
-if(stars.length > 0) {
-    stars.forEach(star => {
+if(starsInput.length > 0) {
+    starsInput.forEach(star => {
         star.addEventListener('click', () => {
             const val = star.getAttribute('data-value');
             if(ratingValue) ratingValue.value = val;
-            
-            stars.forEach(s => {
+            starsInput.forEach(s => {
                 s.style.color = (s.getAttribute('data-value') <= val) ? "#ffc107" : "#ccc";
             });
         });
     });
-    stars.forEach(s => s.style.color = "#ffc107");
+    starsInput.forEach(s => s.style.color = "#ffc107");
 }
 
 const reviewForm = document.getElementById('reviewForm');
@@ -240,12 +353,12 @@ async function compressImage(file) {
 }
 
 if(reviewForm) {
-    const submitBtn = document.getElementById('submitBtn');
-    const progressBar = document.getElementById('progressBar');
-    const uploadStatus = document.getElementById('uploadStatus');
-
     reviewForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const submitBtn = document.getElementById('submitBtn');
+        const progressBar = document.getElementById('progressBar');
+        const uploadStatus = document.getElementById('uploadStatus');
+        
         submitBtn.disabled = true;
         submitBtn.innerText = "Processing...";
 
@@ -304,81 +417,7 @@ if(reviewForm) {
     });
 }
 
-// --- 5. LOAD REVIEWS ---
-const reviewsContainer = document.getElementById('reviewsContainer');
-const loadReviewsBtn = document.getElementById('loadMoreBtn');
-let lastReviewVisible = null;
-const REVIEW_BATCH_SIZE = 5; 
-
-async function loadReviews() {
-    if(!reviewsContainer) return;
-
-    let q;
-    if (!lastReviewVisible) {
-        q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), limit(REVIEW_BATCH_SIZE));
-    } else {
-        q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), startAfter(lastReviewVisible), limit(REVIEW_BATCH_SIZE));
-    }
-
-    try {
-        const querySnapshot = await getDocs(q);
-        
-        if (querySnapshot.empty && !lastReviewVisible) {
-            reviewsContainer.innerHTML = "<p style='text-align:center;'>No reviews yet. Be the first!</p>";
-            if(loadReviewsBtn) loadReviewsBtn.style.display = 'none';
-            return;
-        }
-
-        if (!querySnapshot.empty) {
-            lastReviewVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
-        }
-
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            
-            let stars = "";
-            for(let i=1; i<=5; i++) stars += (i<=data.rating) ? '<i class="fas fa-star" style="color:#f1c40f"></i>' : '<i class="fas fa-star" style="color:#ccc"></i>';
-
-            let media = "";
-            if(data.mediaURL) {
-                const content = (data.mediaType === 'video') 
-                    ? `<video controls src="${data.mediaURL}" style="max-width:100%; border-radius:5px; margin-top:10px;"></video>` 
-                    : `<img src="${data.mediaURL}" alt="User Review" style="max-width:100%; border-radius:5px; margin-top:10px;">`;
-                media = `<div class="media-frame">${content}</div>`;
-            }
-
-            const div = document.createElement("div");
-            div.className = "review-card";
-            div.innerHTML = `
-                <div class="review-header">
-                    <div style="width:40px; height:40px; background:#ff4757; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; margin-right:10px;">
-                        ${data.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                        <h4 style="margin:0;">${data.name}</h4>
-                        <div class="stars">${stars}</div>
-                    </div>
-                </div>
-                <p class="review-text">"${data.text}"</p>
-                ${media}
-            `;
-            reviewsContainer.appendChild(div);
-        });
-
-        if(loadReviewsBtn) {
-            loadReviewsBtn.style.display = (querySnapshot.docs.length < REVIEW_BATCH_SIZE) ? 'none' : 'block';
-        }
-
-    } catch (error) {
-        console.error("Error loading reviews:", error);
-    }
-}
-
-if(loadReviewsBtn) loadReviewsBtn.addEventListener('click', loadReviews);
-loadReviews();
-
-
-// --- 6. BOOKING FORM LOGIC ---
+// Booking Form
 window.sendBooking = function(type) {
     const name = document.getElementById('bookName').value;
     const phone = document.getElementById('bookPhone').value;
@@ -391,13 +430,7 @@ window.sendBooking = function(type) {
         return;
     }
 
-    const message = `*New Booking Enquiry*\n\n` +
-                    `*Name:* ${name}\n` +
-                    `*Phone:* ${phone}\n` +
-                    `*Event Type:* ${eventType}\n` +
-                    `*Date:* ${date}\n` +
-                    `*Address:* ${address}\n\n` +
-                    `Please confirm availability.`;
+    const message = `*New Booking Enquiry*\n\n*Name:* ${name}\n*Phone:* ${phone}\n*Event Type:* ${eventType}\n*Date:* ${date}\n*Address:* ${address}\n\nPlease confirm availability.`;
 
     if(type === 'whatsapp') {
         const waLink = `https://wa.me/917530886327?text=${encodeURIComponent(message)}`;
@@ -409,15 +442,15 @@ window.sendBooking = function(type) {
     }
 };
 
-// --- 7. PREVIEW LOGIC ---
-const previewContainer = document.getElementById('previewContainer');
-const imagePreview = document.getElementById('imagePreview');
-const videoPreview = document.getElementById('videoPreview');
-const uploadBtnText = document.getElementById('uploadBtnText');
-
+// Preview Logic
 if(fileInput) {
     fileInput.addEventListener('change', function() {
         const file = this.files[0];
+        const previewContainer = document.getElementById('previewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const videoPreview = document.getElementById('videoPreview');
+        const uploadBtnText = document.getElementById('uploadBtnText');
+
         if (file) {
             if(previewContainer) previewContainer.style.display = 'block';
             if(uploadBtnText) uploadBtnText.textContent = "Change File";

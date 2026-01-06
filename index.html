@@ -4,39 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Sudip Party Planner | Best Birthday & Event Organiser in Delhi NCR</title>
-    <meta name="description"
-        content="Looking for the best party planner in Delhi NCR? We organize Birthday Parties, Magic Shows, Game Stalls & Decor in Rohini, Pitampura, Noida & Gurgaon. Call 7530886327.">
-    <meta name="keywords"
-        content="Birthday Party Planner Delhi, Magic Show, Bull Ride, Bumper Cars, Water Pool, Carnival Games, Hammer Machine, Kids Party Delhi">
-
+    <link rel="icon" href="data:,"> <title>Sudip Party Planner | Best Birthday & Event Organiser in Delhi NCR</title>
+    <meta name="description" content="Looking for the best party planner in Delhi NCR? We organize Birthday Parties, Magic Shows, Game Stalls & Decor in Rohini, Pitampura, Noida & Gurgaon. Call 7530886327.">
+    
     <meta property="og:title" content="Sudip Party Planner - Delhi's #1 Event Team">
-    <meta property="og:description" content="Book the best magic shows, games, and decoration for your next event.">
     <meta property="og:image" content="https://sudippartyplanner.in/your-logo.jpg">
     <meta property="og:url" content="https://sudippartyplanner.in">
 
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "EventPlanner",
-      "name": "Sudip Party Planner",
-      "email": "MagicianSudip@gmail.com",
-      "telephone": "+91-7530886327",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "Sector 7",
-        "addressLocality": "Rohini",
-        "addressRegion": "Delhi",
-        "postalCode": "110085",
-        "addressCountry": "IN"
-      },
-      "priceRange": "₹₹"
-    }
-    </script>
 </head>
 
 <body>
@@ -45,17 +21,11 @@
         <div class="container header-flex">
             <div class="logo-container">
                 <div class="logo-icon">S</div>
-                <div class="logo-text">
-                    Sudip <span>Party Planner</span>
-                    <small>Making Celebrations Unforgettable</small>
-                </div>
+                <div class="logo-text">Sudip <span>Party Planner</span></div>
             </div>
-
             <nav>
-                <div class="burger">
-                    <div class="line1"></div>
-                    <div class="line2"></div>
-                    <div class="line3"></div>
+                <div class="burger" onclick="document.querySelector('.nav-links').classList.toggle('nav-active')">
+                    <div class="line1"></div><div class="line2"></div><div class="line3"></div>
                 </div>
                 <ul class="nav-links">
                     <li><a href="#home">Home</a></li>
@@ -64,8 +34,7 @@
                     <li><a href="#gallery">Gallery</a></li>
                     <li><a href="#reviews">Reviews</a></li>
                     <li><a href="#contact">Contact</a></li>
-                    <li><a href="brochure.pdf" download class="btn-download"><i class="fas fa-file-pdf"></i> Catalog</a>
-                    </li>
+                    <li><a href="brochure.pdf" download class="btn-download">Catalog</a></li>
                 </ul>
             </nav>
         </div>
@@ -86,8 +55,6 @@
     <section id="games" class="section-padding bg-light">
         <div class="container">
             <h2 class="section-title">Our Premium Services</h2>
-            <p class="section-subtitle">Everything you need for a perfect party</p>
-
             <div class="games-grid">
                 <div class="game-card">
                     <div class="icon-box"><i class="fas fa-magic"></i></div>
@@ -113,42 +80,9 @@
         </div>
     </section>
 
-    <section class="section-padding">
-        <div class="container">
-            <h3 style="text-align: center; margin-bottom: 20px;">We Offer 50+ Unique Activities</h3>
-
-            <p style="text-align: center; margin-bottom: 30px; color: #666; font-size: 1.1rem;">
-                Browse our full catalog in the
-                <a href="brochure.pdf" download class="text-link"><i class="fas fa-download"></i> Brochure PDF</a>,
-                featuring:
-            </p>
-
-            <div class="seo-game-list" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
-                <span class="tag">Hammer Machine</span> <span class="tag">Punching Machine</span>
-                <span class="tag">Electronic Basketball</span> <span class="tag">Bowling Machine</span>
-                <span class="tag">Buzz Wire</span> <span class="tag">Snatch It Game</span>
-                <span class="tag">Street Fighter</span> <span class="tag">Giant Piano</span>
-                <span class="tag">Lazer Gun</span> <span class="tag">Kids Boat</span>
-                <span class="tag">Water Pool</span> <span class="tag">Octopus Water Bouncy</span>
-                <span class="tag">Dolphin Bouncy</span> <span class="tag">Big Bowler</span>
-                <span class="tag">Dunk Game</span> <span class="tag">Hook the Duck</span>
-                <span class="tag">Splat Art</span> <span class="tag">Sand Pit</span>
-                <span class="tag">Beer Puppet</span> <span class="tag">Painting Competition</span>
-                <span class="tag">Spray Tattoo</span> <span class="tag">Candy Floss & Popcorn</span>
-                <span class="tag">Dancing Pad</span> <span class="tag">Karaoke System</span>
-                <span class="tag">Casino Tables</span> <span class="tag">Bumper Cars</span>
-                <span class="tag">Columbus Ride</span> <span class="tag">Giant Wheel</span>
-                <span class="tag">Bull Ride</span> <span class="tag">Trampoline</span>
-            </div>
-        </div>
-    </section>
-
-    <section id="gallery" class="section-padding bg-light">
+    <section id="gallery" class="section-padding">
         <div class="container">
             <h2 class="section-title">Event Gallery</h2>
-            <p style="text-align: center; margin-bottom: 30px; color: #666;">Highlights from our recent parties and
-                events.</p>
-
             <div class="gallery-filters">
                 <button class="filter-btn active" onclick="filterGallery('All')">All</button>
                 <button class="filter-btn" onclick="filterGallery('Birthday Party')">Birthdays</button>
@@ -156,89 +90,71 @@
                 <button class="filter-btn" onclick="filterGallery('Game Stall')">Games</button>
                 <button class="filter-btn" onclick="filterGallery('Decoration')">Decor</button>
             </div>
-
-            <div id="dynamicGallery" class="dynamic-gallery-grid">
-                <p style="text-align:center; width:100%;">Loading Photos...</p>
-            </div>
-
-            <button id="loadMoreGalleryBtn" class="load-more-btn" style="display: none; margin: 30px auto;">Load More
-                Photos</button>
+            <div id="dynamicGallery" class="dynamic-gallery-grid"></div>
+            <br>
+            <button id="loadMoreGalleryBtn" class="load-more-btn">Load More Photos</button>
         </div>
     </section>
 
-    <section id="reviews" class="section-padding">
+    <section id="reviews" class="section-padding bg-light">
         <div class="container">
             <h2 class="section-title">Happy Clients</h2>
             <p class="section-subtitle">Rated 4.9/5 on Google & JustDial</p>
 
-            <div class="google-review-box"
-                style="text-align: center; margin-bottom: 40px; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #eee;">
-
-                <i class="fab fa-google"
-                    style="font-size: 40px; color: #4285F4; margin-bottom: 15px; display: inline-block;"></i>
-
+            <div class="google-review-box" style="text-align: center;">
+                <i class="fab fa-google" style="font-size: 40px; color: #4285F4; margin-bottom: 10px; display: inline-block;"></i>
                 <h3 style="margin-bottom: 10px;">Loved our Party?</h3>
-                <p style="margin-bottom: 20px; color: #666;">Please leave us a review on Google. It helps us reach more
-                    families!</p>
-
-                <a href="https://search.google.com/local/writereview?placeid=ChIJadxE-F4HDTkR3ahbDeqRwZk"
-                    target="_blank" class="btn-google-review">
+                <a href="https://search.google.com/local/writereview?placeid=ChIJadxE-F4HDTkR3ahbDeqRwZk" target="_blank" class="btn-google-review">
                     <i class="fas fa-star"></i> Write a Review on Google
                 </a>
             </div>
 
             <div id="reviewsContainer" class="reviews-grid"></div>
-
+            
             <button id="loadMoreBtn" class="load-more-btn">Read More Reviews</button>
+            
+            <hr style="border: 0; border-top: 1px solid #ddd; margin: 40px 0;">
 
             <div class="add-review-box">
                 <h3><i class="fas fa-pen"></i> Write a Review</h3>
                 <form id="reviewForm">
                     <input type="text" id="reviewerName" placeholder="Your Name" required>
-                    <textarea id="reviewerText" placeholder="How was your experience?" required></textarea>
-
-                    <div class="rating-box">
+                    <textarea id="reviewerText" placeholder="How was your experience?" required rows="4"></textarea>
+                    
+                    <div class="rating-box" style="margin-bottom: 15px;">
                         <label>Rating:</label>
-                        <div class="stars-input" id="starRatingInput">
+                        <div class="stars-input" id="starRatingInput" style="display:inline-block; font-size: 1.2rem; cursor: pointer;">
                             <i class="fas fa-star" data-value="1"></i>
                             <i class="fas fa-star" data-value="2"></i>
                             <i class="fas fa-star" data-value="3"></i>
                             <i class="fas fa-star" data-value="4"></i>
-                            <i class="fas fa-star" data-value="5"></i>
+                            <i class="fas fa-star" data-value="5" style="color: #f1c40f;"></i>
                         </div>
                         <input type="hidden" id="selectedRating" value="5">
                     </div>
 
-                    <div class="file-upload-box">
-                        <label for="reviewMedia" class="custom-file-upload">
-                            <i class="fas fa-camera"></i> <span id="uploadBtnText">Add Photo/Video</span>
+                    <div class="file-upload-box" style="margin-bottom: 15px;">
+                        <label for="reviewMedia" style="cursor:pointer; color: #4285F4; font-weight: bold;">
+                            <i class="fas fa-camera"></i> <span id="uploadBtnText">Add Photos (Max 5)</span>
                         </label>
-                        <input type="file" id="reviewMedia" accept="image/*,video/*" style="display:none;">
+                        <input type="file" id="reviewMedia" accept="image/*,video/*" multiple style="display:none;">
                     </div>
-                    <div id="previewContainer" style="display:none; margin-top:10px;">
-                        <img id="imagePreview" style="max-width: 100px; display:none; border-radius:5px;">
-                        <video id="videoPreview" style="max-width: 100px; display:none; border-radius:5px;"
-                            controls></video>
-                    </div>
+                    
+                    <div id="previewContainer" style="display:none; margin-top:10px;"></div>
                     <div id="uploadStatus" style="display:none; margin-top:10px;">
-                        <div style="width:100%; background:#eee; height:5px; border-radius:3px;">
-                            <div id="progressBar"
-                                style="width:0%; height:100%; background:#2ed573; border-radius:3px; transition:width 0.3s;">
-                            </div>
-                        </div>
-                        <small id="statusText">Uploading...</small>
+                        <div style="width:100%; background:#eee; height:5px;"><div id="progressBar" style="width:0%; height:100%; background:#2ed573;"></div></div>
                     </div>
+                    
                     <button type="submit" id="submitBtn" class="btn-submit">Post Review</button>
                 </form>
             </div>
         </div>
     </section>
 
-    <section id="contact" class="section-padding bg-light">
+    <section id="contact" class="section-padding">
         <div class="container">
             <h2 class="section-title">Book Your Party</h2>
-            <p class="section-subtitle">Fill the form below or call us directly!</p>
-
+            
             <div class="contact-grid-layout">
                 <div class="contact-info-box">
                     <div class="info-item">
@@ -274,7 +190,7 @@
                             <input type="tel" id="bookPhone" placeholder="Mobile Number" required>
                         </div>
                         <div class="form-group">
-                            <input type="text" id="bookAddress" placeholder="Party Location / Address" required>
+                            <input type="text" id="bookAddress" placeholder="Party Location" required>
                         </div>
                         <div class="form-group">
                             <label style="font-size:0.9rem; color:#666;">Event Date:</label>
@@ -292,16 +208,15 @@
 
                         <div class="booking-actions">
                             <button type="button" class="btn-whatsapp-book" onclick="sendBooking('whatsapp')">
-                                <i class="fab fa-whatsapp"></i> Send on WhatsApp
+                                <i class="fab fa-whatsapp"></i> WhatsApp
                             </button>
                             <button type="button" class="btn-email-book" onclick="sendBooking('email')">
-                                <i class="fas fa-envelope"></i> Send via Email
+                                <i class="fas fa-envelope"></i> Email
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
-
         </div>
     </section>
 
@@ -344,14 +259,5 @@
     </div>
 
     <script type="module" src="script.js"></script>
-    <script>
-        const burger = document.querySelector('.burger');
-        const nav = document.querySelector('.nav-links');
-        burger.addEventListener('click', () => {
-            nav.classList.toggle('nav-active');
-            burger.classList.toggle('toggle');
-        });
-    </script>
 </body>
-
 </html>

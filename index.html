@@ -33,7 +33,7 @@
                     <li><a href="#gallery">Gallery</a></li>
                     <li><a href="#reviews">Reviews</a></li>
                     <li><a href="#contact">Contact</a></li>
-                    <li><a href="brochure.pdf" download class="btn-download">Catalog</a></li>
+                    <li><a href="brochure.pdf" download class="btn-download"><i class="fas fa-file-pdf"></i> Catalog</a></li>
                 </ul>
             </nav>
         </div>
@@ -115,36 +115,43 @@
             <hr style="border: 0; border-top: 1px solid #ddd; margin: 40px 0;">
 
             <div class="add-review-box">
-                <h3><i class="fas fa-pen"></i> Write a Review</h3>
+                <h3 style="text-align: center; margin-bottom: 20px;"><i class="fas fa-pen"></i> Write a Review</h3>
                 <form id="reviewForm">
-                    <input type="text" id="reviewerName" placeholder="Your Name" required>
-                    <textarea id="reviewerText" placeholder="How was your experience?" required rows="4"></textarea>
+                    <div class="form-group">
+                        <input type="text" id="reviewerName" placeholder="Your Name" required>
+                    </div>
                     
-                    <div class="rating-box" style="margin-bottom: 15px;">
-                        <label>Rating:</label>
-                        <div class="stars-input" id="starRatingInput" style="display:inline-block; font-size: 1.2rem; cursor: pointer;">
-                            <i class="fas fa-star" data-value="1"></i>
-                            <i class="fas fa-star" data-value="2"></i>
-                            <i class="fas fa-star" data-value="3"></i>
-                            <i class="fas fa-star" data-value="4"></i>
+                    <div class="form-group">
+                        <textarea id="reviewerText" placeholder="How was your experience?" required rows="4"></textarea>
+                    </div>
+                    
+                    <div class="rating-box" style="margin-bottom: 25px; text-align: center;">
+                        <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #555;">Your Rating:</label>
+                        <div class="stars-input" id="starRatingInput">
+                            <i class="fas fa-star" data-value="1" style="color: #f1c40f;"></i>
+                            <i class="fas fa-star" data-value="2" style="color: #f1c40f;"></i>
+                            <i class="fas fa-star" data-value="3" style="color: #f1c40f;"></i>
+                            <i class="fas fa-star" data-value="4" style="color: #f1c40f;"></i>
                             <i class="fas fa-star" data-value="5" style="color: #f1c40f;"></i>
                         </div>
                         <input type="hidden" id="selectedRating" value="5">
                     </div>
 
-                    <div class="file-upload-box" style="margin-bottom: 15px;">
-                        <label for="reviewMedia" style="cursor:pointer; color: #4285F4; font-weight: bold;">
-                            <i class="fas fa-camera"></i> <span id="uploadBtnText">Add Photos (Max 5)</span>
+                    <div class="file-upload-box">
+                        <label for="reviewMedia" class="file-upload-label">
+                            <i class="fas fa-camera"></i> <span id="uploadBtnText">Click to Add Photos (Max 5)</span>
                         </label>
                         <input type="file" id="reviewMedia" accept="image/*,video/*" multiple style="display:none;">
                     </div>
                     
-                    <div id="previewContainer" style="display:none; margin-top:10px;"></div>
+                    <div id="previewContainer" style="display:none; margin-top:15px; justify-content: center; gap: 10px; flex-wrap: wrap;"></div>
                     <div id="uploadStatus" style="display:none; margin-top:10px;">
-                        <div style="width:100%; background:#eee; height:5px;"><div id="progressBar" style="width:0%; height:100%; background:#2ed573;"></div></div>
+                        <div style="width:100%; background:#eee; height:5px; border-radius: 5px; overflow: hidden;">
+                            <div id="progressBar" style="width:0%; height:100%; background:#2ed573;"></div>
+                        </div>
                     </div>
                     
-                    <button type="submit" id="submitBtn" class="btn-submit">Post Review</button>
+                    <button type="submit" id="submitBtn" class="btn-submit" style="margin-top: 20px;">Post Review</button>
                 </form>
             </div>
         </div>

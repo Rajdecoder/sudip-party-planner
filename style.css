@@ -75,7 +75,7 @@ header {
 .hero .highlight { color: var(--primary-color); text-shadow: 1px 1px 2px black; }
 .hero p { font-size: 1.2rem; margin-bottom: 30px; opacity: 0.9; }
 
-.hero-btns { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+.hero-btns { display: flex; gap: 15px; justify-content: center; }
 .btn-main, .btn-secondary {
     padding: 12px 30px; border-radius: 50px; font-weight: 600; font-size: 1rem;
 }
@@ -90,6 +90,7 @@ header {
 
 .games-grid, .reviews-grid {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;
+    margin-bottom: 40px; /* Add space below grid to prevent merging */
 }
 
 .game-card, .review-card {
@@ -105,18 +106,16 @@ header {
     font-size: 2rem; margin: 0 auto 20px;
 }
 
-/* --- REVIEWS --- */
+/* --- REVIEWS SECTION FIXES --- */
 .review-header { display: flex; align-items: center; margin-bottom: 15px; }
-.review-text { font-style: italic; color: #555; margin-bottom: 15px; word-wrap: break-word; }
+.review-text { font-style: italic; color: #555; margin-bottom: 15px; }
 
-/* Review Thumbnails */
 .review-media-grid { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
 .review-media-btn {
     border: none; background: none; padding: 0; cursor: pointer;
     width: 60px; height: 60px; border-radius: 8px; overflow: hidden;
-    position: relative; border: 1px solid #ddd; transition: transform 0.2s;
+    position: relative; border: 1px solid #ddd;
 }
-.review-media-btn:hover { transform: scale(1.05); }
 .review-media-btn img, .review-media-btn video { width: 100%; height: 100%; object-fit: cover; }
 
 .btn-google-review {
@@ -126,18 +125,57 @@ header {
     box-shadow: 0 4px 10px rgba(66, 133, 244, 0.3);
 }
 
-/* --- FORMS --- */
+.google-review-box { margin-bottom: 50px; } /* Separation from grid */
+
+/* Load More Button - Centered and Separated */
+.load-more-btn {
+    display: block; margin: 0 auto 50px auto; /* Margin Bottom ensures space before "Write Review" */
+    background: transparent; border: 2px solid var(--primary-color);
+    color: var(--primary-color); padding: 10px 30px; border-radius: 50px; font-weight: 600; cursor: pointer;
+}
+.load-more-btn:hover { background: var(--primary-color); color: white; }
+
+/* Write Review Box - Distinct Separation */
+.add-review-box {
+    max-width: 600px; margin: 0 auto; background: white; padding: 30px;
+    border-radius: 15px; box-shadow: var(--shadow); border: 1px solid #eee;
+    clear: both; /* Forces it to sit below floated elements if any */
+}
+
+/* --- CONTACT & ENQUIRY EQUAL HEIGHT FIX --- */
 .contact-grid-layout {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; align-items: start;
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 30px; 
+    margin-top: 30px; 
+    align-items: stretch; /* FIX: Forces equal height */
 }
+
 .contact-info-box, .booking-form-box {
-    background: white; padding: 30px; border-radius: 15px; box-shadow: var(--shadow);
+    background: white; 
+    padding: 40px; /* Consistent padding */
+    border-radius: 15px; 
+    box-shadow: var(--shadow);
+    height: 100%; /* Fills the grid cell */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
+
+.booking-form-box { border-top: 5px solid var(--primary-color); }
+
+.contact-info-box .info-item {
+    display: flex; align-items: center; gap: 15px; margin-bottom: 25px;
+}
+.contact-info-box .info-item:last-child { margin-bottom: 0; }
+.info-item i { font-size: 1.5rem; color: var(--primary-color); }
+
 .form-group input, .form-group select, .add-review-box textarea {
     width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px;
     font-family: inherit; font-size: 0.95rem;
 }
-.booking-actions { display: flex; gap: 10px; }
+.booking-actions { display: flex; gap: 10px; margin-top: auto; /* Push buttons to bottom if needed */ }
+
 .btn-whatsapp-book, .btn-email-book, .btn-submit {
     flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
     color: white; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -159,7 +197,7 @@ header {
 .dynamic-gallery-grid {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;
 }
-.gallery-card { height: 200px; border-radius: 10px; overflow: hidden; cursor: pointer; position: relative; }
+.gallery-card { height: 200px; border-radius: 10px; overflow: hidden; cursor: pointer; }
 .gallery-card img, .gallery-card video { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
 .gallery-card:hover img { transform: scale(1.1); }
 
@@ -173,15 +211,13 @@ header {
     max-width: 95%; max-height: 80vh; border-radius: 5px;
     box-shadow: 0 0 20px rgba(0,0,0,0.5); object-fit: contain;
 }
-/* Navigation Arrows */
 .lightbox-prev, .lightbox-next {
     cursor: pointer; position: absolute; top: 50%; width: 50px; height: 50px;
     margin-top: -25px; color: white; font-weight: bold; font-size: 30px;
     background: rgba(255,255,255,0.1); border-radius: 50%;
     display: flex; align-items: center; justify-content: center; z-index: 2001;
-    user-select: none; transition: 0.3s;
+    user-select: none;
 }
-.lightbox-prev:hover, .lightbox-next:hover { background: var(--primary-color); }
 .lightbox-prev { left: 10px; }
 .lightbox-next { right: 10px; }
 .lightbox-close {
@@ -215,7 +251,8 @@ header {
     .hero h1 { font-size: 2.2rem; }
     .section-title { font-size: 1.8rem; }
     
-    .contact-grid-layout { grid-template-columns: 1fr; }
+    /* Stack Contact and Enquiry on Mobile */
+    .contact-grid-layout { grid-template-columns: 1fr; gap: 20px; }
     .booking-actions { flex-direction: column; }
     
     .dynamic-gallery-grid { grid-template-columns: repeat(2, 1fr); }
